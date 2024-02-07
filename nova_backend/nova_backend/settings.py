@@ -118,7 +118,7 @@ PASSWORD_HASHERS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    "https://frontend-nova-b29v.vercel.app", 
+"https://nova-ruddy.vercel.app"
 ]
 
 
