@@ -26,7 +26,7 @@ CSRF_COOKIE_SECURE = True
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["https://nova-169j.onrender.com"]
+ALLOWED_HOSTS = ["nova-169j.onrender.com"]
 
 
 # Application definition
@@ -49,7 +49,7 @@ AUTHENTICATION_BACKENDS = [
                            'django.contrib.auth.backends.ModelBackend', ]
 
 MIDDLEWARE = [
-        'corsheaders.middleware.CorsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -118,8 +118,7 @@ PASSWORD_HASHERS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-    'https://frontend-nova-b29v.vercel.app', 
-    # 'http://localhost:3000'  
+    "https://frontend-nova-b29v.vercel.app", 
 ]
 
 
