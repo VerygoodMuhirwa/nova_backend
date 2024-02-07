@@ -26,7 +26,7 @@ CSRF_COOKIE_SECURE = True
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["https://nova-169j.onrender.com"]
 
 
 # Application definition
