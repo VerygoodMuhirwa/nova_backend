@@ -50,46 +50,38 @@ def registerUser(request):
         response.data= {
             "message":"User created successfully",
             }
-    
     return response;
 
 
 @csrf_protect
 @api_view(["POST"])
 def loginUser(request):
-    from .models import user_collection  
-    request_data = request.data
-    email = request_data.get('email')
-    password = request_data.get('password')
-    user_exists = user_collection.find_one({"email": email})
+    email = request.data.get('email')
+    password = request.data.get('password')
+    user_exists  = user_collection.find_one({"email": email});
     if not user_exists:
-        return Response({"message": "Invalid email or password"}, status=404)
+        return Response({"message":"Invalid email or password"}, status= 401);
     else:
-        stored_password = user_exists.get("password")
-        if check_password(password, stored_password):
-            response=Response()
-            if user_exists is not None:
-                user_id = user_exists.get("_id")            
-                payload = {
-               "id": str(user_id),
-                }
-            
-                print(os.getenv("JWT_SECRET"))
-                token=jwt.encode(payload,str(os.getenv('JWT_SECRET')),algorithm='HS256')
-                if user_exists:
-                    response.data = token
-                    
-                    response.set_cookie(key='jwt', value=token, httponly=True)
-                else:
-                    response.status_code = 404
-                    response.data="Login failed"                
-                return response               
-            else:
-                return Response({"message": "Invalid email or password"}, status=401)
+        storedPassword = user_exists.get("password")
+        isAuthenticated = check_password(password, storedPassword)
+        if(isAuthenticated) :
+               payload = {"id": str(user_exists.get("_id"))}
+               token = jwt.encode(payload, str(os.getenv('JWT_SECRET')) , algorithm='HS256')
+               user= {
+                   "_id":str(user_exists.get("_id")),
+                   "names":str(user_exists.get("username")),
+                   "email":str(user_exists.get("email"))
+               }
+               response = Response(data={"token": token, "message":"Logged in successfully","user": user }, status=200)
+               response.set_cookie(key='jwt', value=token, httponly=True)
+               return response
         else:
-            return Response({"message": "Invalid email or password"}, status=401)
-        
-        
+            return Response({"message":"Invalid email or password"}, status= 401);
+    
+    
+
+@csrf_protect
+@api_view(["GET"])
 def authenticateToken(request):
     response=Response()
     token = request.COOKIES.get('jwt')
@@ -101,19 +93,33 @@ def authenticateToken(request):
         user_exist=user_collection.find_one({"_id": ObjectId(user_id)})        
         print(user_exist)
         if(user_exist):
-            response.status_code=200
-            response.data={"id":user_id,
+            user={
+                           "id":user_id,
                            "email":user_exist.get('email'),
-                           "username":user_exist.get('username')}
+                           "username":user_exist.get('username')
+                           }
+            return user;
         else:
-            response.data="User does not exist"
-        
-        return response 
+            return Response("Invalid token", status= 401);
     except Exception as e:
         print(e)
         response.status_code(500)
-        response.data("Something went wrong")
+        response.data("Internal server error")
         return response
         
         
+        
+        
+
+
+# this shows how we can simply authenticate the person using the custom class that we have created ours selves
+@csrf_protect
+def example_api(request):
+    auth_middleware = authenticateToken()
+    user = auth_middleware.authenticate(request)
+    
+    if user:
+        return Response({'message': 'Authenticated successfully'})
+    else:
+        return Response({'error': 'Authentication failed'}, status=401)
         

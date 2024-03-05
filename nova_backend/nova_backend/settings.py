@@ -26,7 +26,11 @@ CSRF_COOKIE_SECURE = True
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["nova-169j.onrender.com"]
+ALLOWED_HOSTS = [
+    # "nova-169j.onrender.com", 
+    "127.0.0.1",
+    "localhost"
+    ]
 
 
 # Application definition
@@ -118,7 +122,8 @@ PASSWORD_HASHERS = [
 ]
 
 CORS_ALLOWED_ORIGINS = [
-"https://nova-ruddy.vercel.app"
+"https://nova-ruddy.vercel.app",
+"http://localhost:3000"
 ]
 
 
