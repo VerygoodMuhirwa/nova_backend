@@ -25,7 +25,6 @@ class MongoEncoder(DjangoJSONEncoder):
         return super().default(obj)
 @csrf_protect
 @api_view(["POST"])
-@swagger_auto_schema(tags=[' User APIs'])
 def registerUser(request):
     from .models import user_collection  
     request_data = request.data
@@ -58,7 +57,6 @@ def registerUser(request):
 
 @csrf_protect
 @api_view(["POST"])
-@swagger_auto_schema(tags=[' User APIs'])
 def loginUser(request):
     email = request.data.get('email')
     password = request.data.get('password')
