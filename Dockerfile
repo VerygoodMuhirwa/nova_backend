@@ -3,10 +3,13 @@ ENV PYTHONBUFFERED 1;
 
 WORKDIR /code 
 
-COPY requirements.txt .
+COPY ./nova_backend/ /code
 
+COPY ./nova_backend/requirements.txt  .
+
+RUN python -m pip install --upgrade pip
 RUN pip install -r requirements.txt
-COPY . .
-EXPOSE 3500
 
-CMD [ "python","manage.py" ,"runserver"]
+EXPOSE 8000
+
+CMD [ "python3"  ,"manage.py" ,"runserver"]

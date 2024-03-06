@@ -14,6 +14,7 @@ from django.contrib.auth import authenticate, login
 from rest_framework.authtoken.models import Token
 from django.core.serializers.json import DjangoJSONEncoder
 from .models import user_collection
+from drf_yasg.utils import swagger_auto_schema
 
 
 load_dotenv()
@@ -24,6 +25,7 @@ class MongoEncoder(DjangoJSONEncoder):
         return super().default(obj)
 @csrf_protect
 @api_view(["POST"])
+@swagger_auto_schema(tags=[' User APIs'])
 def registerUser(request):
     from .models import user_collection  
     request_data = request.data
@@ -56,6 +58,7 @@ def registerUser(request):
 
 @csrf_protect
 @api_view(["POST"])
+@swagger_auto_schema(tags=[' User APIs'])
 def loginUser(request):
     email = request.data.get('email')
     password = request.data.get('password')
@@ -83,6 +86,7 @@ def loginUser(request):
 
 @csrf_protect
 @api_view(["GET"])
+@swagger_auto_schema(tags=[' User APIs'])
 def authenticateToken(request):
     response=Response()
     token = request.COOKIES.get('jwt')
@@ -115,6 +119,7 @@ def authenticateToken(request):
 
 # this shows how we can simply authenticate the person using the custom class that we have created ours selves
 @csrf_protect
+@swagger_auto_schema(tags=[' User APIs'])
 def example_api(request):
     auth_middleware = authenticateToken()
     user = auth_middleware.authenticate(request)
