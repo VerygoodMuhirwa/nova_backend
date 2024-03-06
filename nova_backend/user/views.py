@@ -53,6 +53,7 @@ def registerUser(request):
     return response;
 
 
+
 @csrf_protect
 @api_view(["POST"])
 def loginUser(request):
