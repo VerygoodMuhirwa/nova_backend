@@ -29,6 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     # "nova-169j.onrender.com", 
     "127.0.0.1",
+    "194.163.167.131",
     "localhost"
     ]
 
