@@ -29,6 +29,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     # "nova-169j.onrender.com", 
     "127.0.0.1",
+    "194.163.167.131",
     "localhost"
     ]
 
@@ -41,11 +42,20 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+     'drf_yasg',
     'django.contrib.staticfiles',
     "rest_framework",
     'corsheaders',
     "user"
 ]
+
+SWAGGER_SETTINGS = {
+    'SECURITY_DEFINITIONS': {
+        'Basic': {
+            'type': 'basic'
+        }
+    }
+}
 
 
 
