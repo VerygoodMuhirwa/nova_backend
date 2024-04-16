@@ -14,8 +14,12 @@ from django.contrib.auth import authenticate, login
 from rest_framework.authtoken.models import Token
 from django.core.serializers.json import DjangoJSONEncoder
 from .models import user_collection
+from rest_framework_simplejwt.exceptions import TokenError
+from rest_framework_simplejwt.tokens import BlacklistMixin
+import jwt
+from django.conf import settings
 
-
+blacklisted_tokens = set()
 load_dotenv()
 class MongoEncoder(DjangoJSONEncoder):
     def default(self, obj):
@@ -79,48 +83,32 @@ def loginUser(request):
         else:
             return Response({"message":"Invalid email or password"}, status= 401);
     
-    
 
+    
 @csrf_protect
-@api_view(["GET"])
-def authenticateToken(request):
-    response=Response()
-    token = request.COOKIES.get('jwt')
+@api_view(["POST"])
+def logout_user(request):
+    token = request.COOKIES.get('jwt')  
     if not token:
-        response.data="No token found"       
-    try:
-        payload = jwt.decode(token, str(os.getenv("JWT_SECRET")), algorithms=['HS256'])
-        user_id = payload['id']   
-        user_exist=user_collection.find_one({"_id": ObjectId(user_id)})        
-        print(user_exist)
-        if(user_exist):
-            user={
-                           "id":user_id,
-                           "email":user_exist.get('email'),
-                           "username":user_exist.get('username')
-                           }
-            return user;
-        else:
-            return Response("Invalid token", status= 401);
-    except Exception as e:
-        print(e)
-        response.status_code(500)
-        response.data("Internal server error")
+        return Response({'error': 'No token found in the cookie'}, status=400)
+    if is_valid_token(token) and token not in blacklisted_tokens:
+        response = Response({'message': 'Logout successful'})
+        response.delete_cookie('jwt')
+        blacklisted_tokens.add(token)
         return response
-        
-        
-        
-        
-
-
-# this shows how we can simply authenticate the person using the custom class that we have created ours selves
-@csrf_protect
-def example_api(request):
-    auth_middleware = authenticateToken()
-    user = auth_middleware.authenticate(request)
-    
-    if user:
-        return Response({'message': 'Authenticated successfully'})
     else:
-        return Response({'error': 'Authentication failed'}, status=401)
-        
+        return Response({'error': 'Invalid or blacklisted token'}, status=401)
+
+
+
+def is_valid_token(token):
+    try:
+        decoded_token = jwt.decode(token, str(os.getenv("JWT_SECRET")), algorithms=['HS256'])
+        if decoded_token and token in blacklisted_tokens:
+            return False  
+        else:
+            return True 
+    except jwt.ExpiredSignatureError:
+        return False 
+    except jwt.InvalidTokenError:
+        return False 
