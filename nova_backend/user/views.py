@@ -89,10 +89,11 @@ def loginUser(request):
 @api_view(["POST"])
 def logout_user(request):
     token = request.COOKIES.get('jwt')  
+    
     if not token:
         return Response({'error': 'No token found in the cookie'}, status=400)
     if is_valid_token(token) and token not in blacklisted_tokens:
-        response = Response({'message': 'Logout successful'}, status=200)
+        response = Response({'message': 'Logged out successfully'}, status=200)
         response.delete_cookie('jwt')
         blacklisted_tokens.add(token)   
         return response

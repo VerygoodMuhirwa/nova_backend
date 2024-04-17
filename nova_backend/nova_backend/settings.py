@@ -133,9 +133,12 @@ PASSWORD_HASHERS = [
 
 CORS_ALLOWED_ORIGINS = [
 "https://nova-ruddy.vercel.app",
-"http://localhost:3000"
+"http://localhost:3000",
+"http://194.163.167.131"
 ]
 
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_HEADERS = ['Authorization', 'Content-Type', 'Cookie']
 
 
 # Internationalization
