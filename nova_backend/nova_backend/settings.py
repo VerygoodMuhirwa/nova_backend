@@ -113,7 +113,8 @@ DATABASES = {
     'mongodb_atlas': {
         'ENGINE': 'djongo',
         'ENFORCE_SCHEMA': False,
-        'NAME': 'nova_project',  
+        'NAME': 'nova_project',
+
         'CLIENT': {
             'host': 'cluster0.c5iqqff.mongodb.net',
             'username': 'VerygoodMuhirwa',  
@@ -150,7 +151,7 @@ PASSWORD_HASHERS = [
 
 CORS_ALLOWED_ORIGINS = [
 "https://nova-ruddy.vercel.app",
-"http://localhost:3000",
+"localhost",
 "http://194.163.167.131"
 ]
 
