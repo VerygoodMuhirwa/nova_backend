@@ -13,28 +13,19 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 import os
 from dotenv import load_dotenv
 load_dotenv()
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/2.1/howto/deployment/checklist/
-
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'm6tk7jj_49s9m89y0h57zlsmy7_kvh$(y@2d(x%k3%b-3s=^t^'
 CSRF_COOKIE_SECURE = True
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    # "nova-169j.onrender.com", 
     "127.0.0.1",
     "194.163.167.131",
     "localhost"
     ]
 
 
-# Application definition
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -46,9 +37,23 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     "rest_framework",
     'corsheaders',
-    "user"
+    "user",
+    'verification'
 ]
 
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_USE_TLS = True
+EMAIL_PORT = 587  # Use port 587 for TLS encryption, or update to your SMTP server's appropriate port
+EMAIL_HOST_USER = 'verygoodmuhirwa2@gmail.com'  # Your Gmail address
+EMAIL_HOST_PASSWORD = 'stqm hzai agfy adjz'  # Use the generated app password here
+DEFAULT_FROM_EMAIL = 'verygoodmuhirwa2@gmail.com' 
+EMAIL_APP_NAME = 'Django SMTP'  # This is the custom name you provided during app password generation
+
+if DEBUG:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 SWAGGER_SETTINGS = {
     'SECURITY_DEFINITIONS': {
         'Basic': {
@@ -56,7 +61,6 @@ SWAGGER_SETTINGS = {
         }
     }
 }
-
 
 
 AUTHENTICATION_BACKENDS = [
@@ -93,21 +97,34 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'nova_backend.wsgi.application'
+ASGI_APPLICATION = 'nova_backend.routing.application'
 
-
-# Database
-# https://docs.djangoproject.com/en/2.1/ref/settings/#databases
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'djongo',
+        'ENFORCE_SCHEMA': False,
+        'NAME': 'nova_project',  
+        'CLIENT': {
+            'host': 'localhost',
+            'port': 27017,
+        }
+    },
+    'mongodb_atlas': {
+        'ENGINE': 'djongo',
+        'ENFORCE_SCHEMA': False,
+        'NAME': 'nova_project',  
+        'CLIENT': {
+            'host': 'cluster0.c5iqqff.mongodb.net',
+            'username': 'VerygoodMuhirwa',  
+            'password': 'Verygood',  
+            'authSource': 'admin',  
+            'authMechanism': 'SCRAM-SHA-1', 
+        }
     }
 }
 
 
-# Password validation
-# https://docs.djangoproject.com/en/2.1/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -141,9 +158,6 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = ['Authorization', 'Content-Type', 'Cookie']
 
 
-# Internationalization
-# https://docs.djangoproject.com/en/2.1/topics/i18n/
-
 LANGUAGE_CODE = 'en-us'
 
 TIME_ZONE = 'UTC'
@@ -154,9 +168,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/2.1/howto/static-files/
 
 STATIC_URL = '/static/'
 
