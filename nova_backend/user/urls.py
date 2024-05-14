@@ -4,5 +4,7 @@ urlpatterns= [
     path("registerUser" , views.registerUser),
     path("loginUser", views.loginUser),
     path("updateProfile", views.updateProfile),
+    path("updatePassword", views.updatePassword),
+
 ]
 

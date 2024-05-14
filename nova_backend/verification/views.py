@@ -1,52 +1,49 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import User, VerificationCode
-from .serializers import VerificationCodeSerializer
-from django.core.mail import send_mail
-from django.conf import settings
 
 
-class GenerateConfirmationCode(APIView):
-    def post(self, request):
-        email = request.data.get('email')
+from django.http import JsonResponse
+from user.models import User
+from .models import VerificationCode
+from django.views.decorators.csrf import csrf_protect
+from rest_framework.decorators import api_view
+@csrf_protect
+@api_view(["POST"])
+def save_verification_code(request):
+    email = request.data.get('email')
+    code = request.data.get('code')
 
-        try:
-            user = User.objects.get(email=email)
-        except User.DoesNotExist:
-            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
 
-        confirmation_code = generate_confirmation_code()
-        verification_code = VerificationCode.objects.create(user=user, code=confirmation_code)
+    verification_code, created = VerificationCode.objects.get_or_create(email=email)
 
-        serializer = VerificationCodeSerializer(verification_code)
+    if not created:
+        verification_code.code = code
+        verification_code.save()
+    else:
+        verification_code.code = code
+        verification_code.save()
 
-        subject = 'Nova Password Reset Confirmation Code'
-        message = f'Your Nova reset password confirmation code is: {confirmation_code}. Please use this code to reset your password. Click here to go to the password reset page: http://localhost:3000/verification'
-        sender_email = settings.EMAIL_HOST_USER  
-        recipient_list = [email]
-
-        send_mail(subject, message, sender_email, recipient_list, fail_silently=False)
-
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    return JsonResponse({'message': 'Code saved successfully'}, status=200)
 
 
-def generate_confirmation_code():
-    import random
-    return ''.join(random.choices('0123456789', k=6))
 
+@csrf_protect
+@api_view(["POST"])
+def verify_verification_code(request):
+    email = request.data.get('email')
+    code = request.data.get('code')
+    print(code, email)
 
-class VerifyConfirmationCode(APIView):
-    def post(self, request):
-        code = request.data.get('code')  
-        try:
-            verification_code = VerificationCode.objects.get(code=code)
-            print(verification_code)
-        except VerificationCode.DoesNotExist:
-            return Response({'error': 'Invalid code'}, status=status.HTTP_400_BAD_REQUEST)
+    try:
+        user = User.objects.get(email=email)
+    except User.DoesNotExist:
+        return JsonResponse({'error': 'User not found'}, status=404)
 
-        verification_code_data = verification_code._id
+    try:
+        verification_code = VerificationCode.objects.get(email=email, code=code)
+    except VerificationCode.DoesNotExist:
+        return JsonResponse({'error': 'Invalid code'}, status=400)
 
-        verification_code.delete() 
-
-        return Response({'message': 'Code verified successfully', 'verification_code_data': verification_code_data}, status=status.HTTP_200_OK)
+    return JsonResponse({'message': 'Code verified successfully'}, status=200)

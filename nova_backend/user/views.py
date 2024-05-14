@@ -1,4 +1,3 @@
-import base64
 import os
 from django.views.decorators.csrf import csrf_protect
 from rest_framework.decorators import api_view
@@ -16,9 +15,14 @@ class MongoEncoder(DjangoJSONEncoder):
             return str(obj)
         return super().default(obj)
 
+
 def authenticate_user(view_func):
     def wrapper(request, *args, **kwargs):
-        token = request.COOKIES.get('jwt')
+        auth_header = request.headers.get('Authorization')
+        if not auth_header or not auth_header.startswith('Bearer '):
+            return Response({"message": "Authentication credentials were not provided"}, status=401)
+
+        token = auth_header.split(' ')[1]
         if not token:
             return Response({"message": "Authentication credentials were not provided"}, status=401)
 
@@ -43,21 +47,22 @@ def registerUser(request):
     username = request_data["names"]
     email = request_data["email"]
     password = request_data["password"]
-    
+
     if User.objects.filter(email=email).exists():
         return Response({"message": "User with that email already exists"}, status=409)
-    
+
     hashed_password = make_password(password, hasher="bcrypt")
     new_user = User(username=username, email=email, password=hashed_password)
     new_user.save()
 
-    serialized_user= {
+    serialized_user = {
         "id": new_user.id,
         "username": new_user.username,
         "email": new_user.email
     }
-    
-    return Response({"message": "User created successfully", "user":serialized_user}, status=200)
+
+    return Response({"message": "User created successfully", "user": serialized_user}, status=200)
+
 
 @csrf_protect
 @api_view(["POST"])
@@ -69,17 +74,16 @@ def loginUser(request):
     print(user)
     if not user:
         return Response({"message": "Invalid email or password"}, status=401)
-    
+
     if check_password(password, user.password):
         payload = {"id": str(user.id)}
         token = jwt.encode(payload, str(os.getenv('JWT_SECRET')), algorithm='HS256')
-        user_data = {"_id": str(user.id), "names": user.username, "email": user.email,"profilePhoto":user.photo}
+        user_data = {"_id": str(user.id), "names": user.username, "email": user.email, "profilePhoto": user.photo}
         response_data = {"token": token, "message": "Logged in successfully", "user": user_data}
-        response = Response(data=response_data, status=200)
-        response.set_cookie(key='jwt', value=token, httponly=True)
-        return response
+        return Response(data=response_data, status=200)
     else:
         return Response({"message": "Invalid email or password"}, status=401)
+
 
 @csrf_protect
 @api_view(["PUT"])
@@ -117,3 +121,24 @@ def updateProfile(request):  # Remove user_id as a parameter
         return Response({"message": "Profile updated successfully", "user": serialized_user})
     else:
         return Response({"message": "Invalid email or password"}, status=401)
+
+
+@csrf_protect
+@api_view(["PUT"])
+@authenticate_user
+def updatePassword(request):
+    user_id = request.user_id
+    print(user_id)
+    request_data = request.data
+    email = request_data.get("email")
+    new_password = request_data.get("newPassword")
+
+    try:
+        user = User.objects.get(pk=user_id, email=email)
+    except User.DoesNotExist:
+        return Response({"message": "User not found"}, status=404)
+
+    hashed_password = make_password(new_password, hasher="bcrypt")
+    user.password = hashed_password
+    user.save()
+    return Response({"message": "Password updated successfully"})

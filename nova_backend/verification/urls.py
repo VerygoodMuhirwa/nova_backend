@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('generate-confirmation-code', views.GenerateConfirmationCode.as_view(), name='generate-confirmation-code'),
-    path("verifyConfirmationCode", views.VerifyConfirmationCode.as_view(), name="verifyConfirmationCode")
+    path('store_verification_code', views.save_verification_code),
+    path("verify_code", views.verify_verification_code)
 ]
+

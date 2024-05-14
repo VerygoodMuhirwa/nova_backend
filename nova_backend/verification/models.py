@@ -2,7 +2,7 @@ from djongo import models
 from user.models import User
 
 class VerificationCode(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    email = models.EmailField(unique=True)
     code = models.PositiveIntegerField(unique=True)
 
     class Meta:
@@ -13,11 +13,3 @@ class VerificationCode(models.Model):
 
     def _id(self):
         return f"{self._id}"
-    @property
-    def serialized_data(self):
-        return {
-            '_id': str(self.pk),  # Convert ObjectId to string
-            'code': self.code,
-            'user_id': str(self.user.pk),  # Convert ObjectId to string
-            'username': self.user.username  # Add any other user data you need
-        }
