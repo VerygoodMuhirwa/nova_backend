@@ -38,8 +38,13 @@ INSTALLED_APPS = [
     "rest_framework",
     'corsheaders',
     "user",
-    'verification'
+    'verification',
+'channels',
+    'sensorapp'
 ]
+
+ASGI_APPLICATION = 'nova_backend.asgi.application'
+
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
@@ -60,6 +65,15 @@ SWAGGER_SETTINGS = {
             'type': 'basic'
         }
     }
+}
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [("127.0.0.1", 6379)],
+        },
+    },
 }
 
 

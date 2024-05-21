@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Live Sensor Data</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        #data {
+            margin-top: 20px;
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Live Sensor Data</h1>
+    <div id="data">Waiting for data...</div>
+
+    <script>
+        var socket = new WebSocket('ws://localhost:8000/ws/sensor-data/');
+
+        socket.onmessage = function(e) {
+            var data = JSON.parse(e.data);
+            var timestamp = new Date(data.time).toLocaleString();
+            var temperature = data.temperature;
+            var moisture = data.moisture;
+
+            document.getElementById('data').innerHTML = `Timestamp: ${timestamp} <br> Temperature: ${temperature} <br> Moisture: ${moisture}`;
+        };
+
+        socket.onclose = function(e) {
+            console.error('WebSocket closed unexpectedly');
+        };
+    </script>
+</body>
+</html>
