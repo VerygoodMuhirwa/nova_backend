@@ -3,7 +3,7 @@ import requests
 import datetime
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
-
+import pytz
 
 def fetch_data_from_thingspeak(channel_id, read_api_key, interval=10):
     url = f'https://api.thingspeak.com/channels/{channel_id}/feeds/last.json?api_key={read_api_key}'
@@ -17,7 +17,7 @@ def fetch_data_from_thingspeak(channel_id, read_api_key, interval=10):
                 if 'field1' in data and 'field2' in data:
                     temperature = data['field1']
                     moisture = data['field2']
-                    receive_time = datetime.datetime.now().isoformat()
+                    receive_time = datetime.datetime.now(pytz.utc).isoformat()
 
                     async_to_sync(channel_layer.group_send)(
                         "sensor_data",

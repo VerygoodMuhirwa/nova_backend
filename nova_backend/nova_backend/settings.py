@@ -19,13 +19,15 @@ SECRET_KEY = 'm6tk7jj_49s9m89y0h57zlsmy7_kvh$(y@2d(x%k3%b-3s=^t^'
 CSRF_COOKIE_SECURE = True
 DEBUG = True
 
-ALLOWED_HOSTS = [
-    "127.0.0.1",
-    "194.163.167.131",
-    "localhost"
-    ]
+# ALLOWED_HOSTS = [
+#     "127.0.0.1",
+#     "194.163.167.131",
+#     "exp://10.5.222.221:8081",
+#     "localhost"
+# ]
 
-
+ALLOWED_HOSTS = ["*"]
+CORS_ALLOW_ALL_ORIGINS = True
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -163,11 +165,15 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',
 ]
 
-CORS_ALLOWED_ORIGINS = [
-"https://nova-ruddy.vercel.app",
-"http://localhost:3000",
-"http://194.163.167.131"
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "https://nova-ruddy.vercel.app",
+#     "http://localhost:3000",
+#     "http://194.163.167.131",
+#     "http://localhost:8081",
+#     "exp://10.5.222.221:8081"
+# ]
+
+# CORS_ALLOW_ALL_ORIGINS = True
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = ['Authorization', 'Content-Type', 'Cookie']
