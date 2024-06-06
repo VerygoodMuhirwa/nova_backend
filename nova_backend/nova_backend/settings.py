@@ -11,8 +11,7 @@ https://docs.djangoproject.com/en/2.1/ref/settings/
 """
 
 import os
-from dotenv import load_dotenv
-load_dotenv()
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = 'm6tk7jj_49s9m89y0h57zlsmy7_kvh$(y@2d(x%k3%b-3s=^t^'
@@ -27,27 +26,26 @@ DEBUG = True
 # ]
 
 ALLOWED_HOSTS = ["*"]
-CORS_ALLOW_ALL_ORIGINS = True
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
-     'drf_yasg',
+    'drf_yasg',
     'django.contrib.staticfiles',
-    "rest_framework",
+    'rest_framework',
     'corsheaders',
-    "user",
-    'verification',
-'channels',
-    'sensorapp'
+    'user.apps.UserConfig',
+    'verification.apps.VerificationConfig',
+    'sensorapp.apps.SensorappConfig',
+    'channels',
 ]
 
+
+# ASGI_APPLICATION = 'nova_backend.settings'
+WSGI_APPLICATION = 'nova_backend.wsgi.application'
 ASGI_APPLICATION = 'nova_backend.asgi.application'
-
-
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_USE_TLS = True
@@ -112,8 +110,6 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'nova_backend.wsgi.application'
-ASGI_APPLICATION = 'nova_backend.routing.application'
 
 
 DATABASES = {
@@ -165,13 +161,13 @@ PASSWORD_HASHERS = [
     'django.contrib.auth.hashers.Argon2PasswordHasher',
 ]
 
-# CORS_ALLOWED_ORIGINS = [
-#     "https://nova-ruddy.vercel.app",
-#     "http://localhost:3000",
-#     "http://194.163.167.131",
-#     "http://localhost:8081",
-#     "exp://10.5.222.221:8081"
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "https://nova-ruddy.vercel.app",
+    "http://localhost:3000",
+    "http://194.163.167.131",
+    "http://localhost:8081",
+    "exp://10.5.222.221:8081"
+]
 
 # CORS_ALLOW_ALL_ORIGINS = True
 

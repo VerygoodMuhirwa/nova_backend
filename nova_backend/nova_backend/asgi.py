@@ -1,15 +1,30 @@
 import os
-from channels.auth import AuthMiddlewareStack
-from channels.routing import ProtocolTypeRouter, URLRouter
 from django.core.asgi import get_asgi_application
-import sensorapp.routing
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
 import threading
 from sensorapp.fetch_data import fetch_data_from_thingspeak
+from dotenv import load_dotenv
+import sensorapp.routing
 
+import os
+from django.core.asgi import get_asgi_application
+from channels.routing import ProtocolTypeRouter, URLRouter
+from channels.auth import AuthMiddlewareStack
+import sensorapp.routing
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
+
+# Set default settings module for Django
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nova_backend.settings')
 
+django_asgi_app = get_asgi_application()
+
+# Define the application
 application = ProtocolTypeRouter({
-    "http": get_asgi_application(),
+    "http": django_asgi_app,
     "websocket": AuthMiddlewareStack(
         URLRouter(
             sensorapp.routing.websocket_urlpatterns
@@ -26,3 +41,4 @@ def start_fetching_data():
 thread = threading.Thread(target=start_fetching_data)
 thread.daemon = True
 thread.start()
+

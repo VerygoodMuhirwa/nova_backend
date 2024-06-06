@@ -55,4 +55,4 @@ def fetch_and_receive_data(request):
         except Exception as e:
             return JsonResponse({"status": "failed", "error": f"Error: {e}"}, status=500)
 
-    return JsonResponse({"status": "failed", "error": "Invalid request method"}, status=400)
+    return JsonResponse({"status": "failed", "error": "Invalid   request method"}, status=400)

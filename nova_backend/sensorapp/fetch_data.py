@@ -5,6 +5,10 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 import pytz
 
+def reverse_moisture_reading(moisture):
+    print(moisture)
+    return 1024 - moisture
+
 def fetch_data_from_thingspeak(channel_id, read_api_key, interval=10):
     url = f'https://api.thingspeak.com/channels/{channel_id}/feeds/last.json?api_key={read_api_key}'
     channel_layer = get_channel_layer()
@@ -17,7 +21,13 @@ def fetch_data_from_thingspeak(channel_id, read_api_key, interval=10):
                 if 'field1' in data and 'field2' in data:
                     temperature = data['field1']
                     moisture = data['field2']
-                    receive_time = datetime.datetime.now(pytz.utc).isoformat()
+
+                    if moisture is not None:
+                        reversed_moisture = reverse_moisture_reading(int(moisture))
+                    else:
+                        reversed_moisture = None
+
+                    receive_time = datetime.datetime.now(pytz.utc)
 
                     async_to_sync(channel_layer.group_send)(
                         "sensor_data",
@@ -25,12 +35,12 @@ def fetch_data_from_thingspeak(channel_id, read_api_key, interval=10):
                             "type": "send_sensor_data",
                             "data": {
                                 "temperature": temperature,
-                                "moisture": moisture,
-                                "time": receive_time
+                                "moisture": reversed_moisture,
+                                "time": receive_time.isoformat()
                             }
                         }
                     )
-                    print(f"Temperature: {temperature}, Moisture: {moisture}, Time: {receive_time}")
+                    print(f"Temperature: {temperature}, Moisture: {reversed_moisture}, Time: {receive_time.isoformat()}")
                 else:
                     print("Error: Required fields not found in response")
             else:
