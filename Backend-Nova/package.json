@@ -1,0 +1,19 @@
+{
+  "name": "backend-nova",
+  "version": "1.0.0",
+  "description": "Backend system for Novars project",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VerygoodMuhirwa/Backend-Nova.git"
+  },
+  "author": "Verygood",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/VerygoodMuhirwa/Backend-Nova/issues"
+  },
+  "homepage": "https://github.com/VerygoodMuhirwa/Backend-Nova#readme"
+}
