@@ -1,9 +1,13 @@
-from django.db import models
+from djongo import models
 from django.utils import timezone
 
 class SensorData(models.Model):
-    timestamp = models.DateTimeField(default=timezone.now)
+    user = models.CharField(max_length=100)
+    sensorName = models.CharField(max_length=100)
+    location = models.CharField(max_length=100)
+    physicalQuantity = models.CharField(max_length=100)
     value = models.FloatField()
+    timestamp = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
-        return f"{self.timestamp}: {self.value}"
+        return f"Sensor: {self.sensorName} | Value: {self.value} | Timestamp: {self.timestamp}"

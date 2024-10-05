@@ -1,44 +1,19 @@
 import os
+import django
 from django.core.asgi import get_asgi_application
+django.setup()
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
-import threading
-from sensorapp.fetch_data import fetch_data_from_thingspeak
-from dotenv import load_dotenv
-import sensorapp.routing
+from sensorapp.routing import websocket_urlpatterns
 
-import os
-from django.core.asgi import get_asgi_application
-from channels.routing import ProtocolTypeRouter, URLRouter
-from channels.auth import AuthMiddlewareStack
-import sensorapp.routing
-from dotenv import load_dotenv
-
-# Load environment variables
-load_dotenv()
-
-# Set default settings module for Django
+# Set the Django settings module
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'nova_backend.settings')
 
-django_asgi_app = get_asgi_application()
 
-# Define the application
+# Set up ASGI application
 application = ProtocolTypeRouter({
-    "http": django_asgi_app,
+    "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
-        URLRouter(
-            sensorapp.routing.websocket_urlpatterns
-        )
+        URLRouter(websocket_urlpatterns)
     ),
 })
-
-# Start the ThingSpeak data fetching in a background thread
-def start_fetching_data():
-    channel_id = '2511877'
-    read_api_key = 'YX33ECEWQJ1PXWKJ'
-    fetch_data_from_thingspeak(channel_id, read_api_key)
-
-thread = threading.Thread(target=start_fetching_data)
-thread.daemon = True
-thread.start()
-

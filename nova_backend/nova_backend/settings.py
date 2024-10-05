@@ -18,14 +18,12 @@ SECRET_KEY = 'm6tk7jj_49s9m89y0h57zlsmy7_kvh$(y@2d(x%k3%b-3s=^t^'
 CSRF_COOKIE_SECURE = True
 DEBUG = True
 
-# ALLOWED_HOSTS = [
-#     "127.0.0.1",
-#     "194.163.167.131",
-#     "exp://10.5.222.221:8081",
-#     "localhost"
-# ]
+ALLOWED_HOSTS = [
+    "127.0.0.1",
+    "194.163.167.131",
+    "localhost"
+]
 
-ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',

@@ -5,13 +5,13 @@ from .models import SensorData
 from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 import datetime
+import json
 
 
 @csrf_exempt
 def fetch_and_receive_data(request):
     if request.method == "POST":
         try:
-            # Fetch data from ThingSpeak
             channel_id = '2511877'
             read_api_key = 'YX33ECEWQJ1PXWKJ'
             url = f'https://api.thingspeak.com/channels/{channel_id}/feeds/last.json?api_key={read_api_key}'
@@ -56,3 +56,62 @@ def fetch_and_receive_data(request):
             return JsonResponse({"status": "failed", "error": f"Error: {e}"}, status=500)
 
     return JsonResponse({"status": "failed", "error": "Invalid   request method"}, status=400)
+
+
+
+
+@csrf_exempt
+def store_sensor_data(request):
+    if request.method == 'POST':
+        try:
+            # Load JSON data from request body
+            data = json.loads(request.body)
+
+            # Extract data fields
+            user = data.get('user')
+            sensor_name = data.get('sensorName')
+            location = data.get('location')
+            physical_quantity = data.get('physicalQuantity')
+            value = data.get('value')
+
+            # Create a new SensorData object and save to MongoDB
+            sensor_data = SensorData(
+                user=user,
+                sensorName=sensor_name,
+                location=location,
+                physicalQuantity=physical_quantity,
+                value=value
+            )
+            sensor_data.save()
+
+            return JsonResponse({"message": "Data saved successfully"}, status=201)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    else:
+        return JsonResponse({"error": "Only POST requests are allowed"}, status=405)
+
+
+
+def get_all_sensor_data(request):
+    if request.method == 'GET':
+        try:
+            # Query the database to get all SensorData objects
+            sensor_data_list = SensorData.objects.all()
+
+            # Create a list of dictionaries to hold the data
+            sensor_data_response = [
+                {
+                    "user": data.user,
+                    "sensorName": data.sensorName,
+                    "location": data.location,
+                    "physicalQuantity": data.physicalQuantity,
+                    "value": data.value,
+                    "timestamp": data.timestamp
+                } for data in sensor_data_list
+            ]
+
+            return JsonResponse(sensor_data_response, safe=False, status=200)
+        except Exception as e:
+            return JsonResponse({"error": str(e)}, status=400)
+    else:
+        return JsonResponse({"error": "Only GET requests are allowed"}, status=405)

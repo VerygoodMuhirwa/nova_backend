@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Live Sensor Data</title>
     <style>
         body {
@@ -9,7 +10,13 @@
         }
         #data {
             margin-top: 20px;
-            font-size: 24px;
+            font-size: 18px;
+        }
+        .sensor-item {
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
         }
     </style>
 </head>
@@ -22,11 +29,46 @@
 
         socket.onmessage = function(e) {
             var data = JSON.parse(e.data);
-            var timestamp = new Date(data.time).toLocaleString();
-            var temperature = data.temperature;
-            var moisture = data.moisture;
 
-            document.getElementById('data').innerHTML = `Timestamp: ${timestamp} <br> Temperature: ${temperature} <br> Moisture: ${moisture}`;
+            // Log the received data to inspect its structure
+            console.log('Received data:', data);
+
+            // Access the sensor_data array within the object
+            var sensorDataArray = data.sensor_data;
+
+            // Ensure sensorDataArray exists and is an array
+            if (!Array.isArray(sensorDataArray)) {
+                console.error('sensor_data is not an array or is missing.');
+                return;
+            }
+
+            var displayData = '';
+
+            sensorDataArray.forEach(function(data) {
+                // Log each item to see what fields are available
+                console.log('Individual sensor data:', data);
+
+                // Use the correct field names based on the structure of the data
+                var timestamp = new Date(data.timestamp).toLocaleString();
+                var user = data.user || 'N/A';
+                var sensorName = data.sensorName || 'Unknown Sensor';
+                var location = data.location || 'Unknown Location';
+                var physicalQuantity = data.physicalQuantity || 'Unknown Quantity';
+                var value = data.value !== undefined ? data.value : 'No Value';
+
+                displayData += `
+                    <div class="sensor-item">
+                        <strong>Sensor Name:</strong> ${sensorName}<br>
+                        <strong>User ID:</strong> ${user}<br>
+                        <strong>Location:</strong> ${location}<br>
+                        <strong>Physical Quantity:</strong> ${physicalQuantity}<br>
+                        <strong>Value:</strong> ${value}<br>
+                        <strong>Timestamp:</strong> ${timestamp}<br>
+                    </div>
+                `;
+            });
+
+            document.getElementById('data').innerHTML = displayData;
         };
 
         socket.onclose = function(e) {

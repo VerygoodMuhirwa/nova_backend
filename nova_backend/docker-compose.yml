@@ -4,6 +4,6 @@ services:
   django:
     build:
       context: .
-      dockerfile: Dockerfile  # Assuming your Dockerfile is named Dockerfile
+      dockerfile: Dockerfile
     ports:
       - "8000:8000"
