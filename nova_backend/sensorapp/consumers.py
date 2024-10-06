@@ -87,7 +87,6 @@ class VideoConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        # Handle received data if needed
 
     async def video_stream(self):
         cap = cv.VideoCapture(0)  # Use webcam
@@ -136,6 +135,6 @@ class VideoConsumer(AsyncWebsocketConsumer):
                 x2 = int(detections[0, 0, i, 5] * frameWidth)
                 y2 = int(detections[0, 0, i, 6] * frameHeight)
                 bboxes.append([x1, y1, x2, y2])
-                cv.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)  # Draw bounding box
+                cv.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
 
         return frame, bboxes
