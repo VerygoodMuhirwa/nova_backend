@@ -17,6 +17,6 @@ COPY . /code
 EXPOSE 8000
 # Install Redis server and Daphne
 RUN apt-get update && apt-get install -y redis-server && \
-    pip install daphne
+    pip install daphne && apt-get -y install daphne
 # Start Redis server and run the backend application with Daphne
 CMD service redis-server start && daphne -p 8000 nova_backend.asgi:application & python manage.py runserver 0.0.0.0:8000
