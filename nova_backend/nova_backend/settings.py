@@ -111,15 +111,15 @@ TEMPLATES = [
 
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'djongo',
-        'ENFORCE_SCHEMA': False,
-        'NAME': 'nova_project',  
-        'CLIENT': {
-            'host': 'localhost',
-            'port': 27017,
-        }
-    },
+    # 'default': {
+    #     'ENGINE': 'djongo',
+    #     'ENFORCE_SCHEMA': False,
+    #     'NAME': 'nova_project',
+    #     'CLIENT': {
+    #         'host': 'localhost',
+    #         'port': 27017,
+    #     }
+    # },
     'mongodb_atlas': {
         'ENGINE': 'djongo',
         'ENFORCE_SCHEMA': False,
