@@ -3,7 +3,8 @@ ENV PYTHONBUFFERED 1
 WORKDIR /code
 COPY requirements.txt /code/
 RUN python -m pip install --upgrade pip && \
-    pip install -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt --verbose
+
 # Stage 2: Final image
 FROM python:3.11.1
 ENV PYTHONBUFFERED 1
