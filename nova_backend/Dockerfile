@@ -2,15 +2,22 @@
 FROM python:3.11.1 AS builder
 ENV PYTHONBUFFERED 1
 WORKDIR /code
+
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     libatlas-base-dev \
     gfortran \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
+
+RUN python -m pip install --upgrade pip setuptools
+RUN apt-get update && apt-get install -y build-essential
+
 COPY requirements.txt /code/
 RUN python -m pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt --verbose
+    pip install --no-cache-dir --only-binary :all: -r requirements.txt --verbose
+
 
 # Stage 2: Final image
 FROM python:3.11.1
