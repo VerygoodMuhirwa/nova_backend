@@ -1,3 +1,4 @@
+# Stage 1: Builder
 FROM python:3.11.1 AS builder
 ENV PYTHONBUFFERED 1
 WORKDIR /code
@@ -8,6 +9,7 @@ RUN python -m pip install --upgrade pip && \
 # Stage 2: Final image
 FROM python:3.11.1
 ENV PYTHONBUFFERED 1
+ENV DJANGO_SETTINGS_MODULE nova_backend.settings  # Set the DJANGO_SETTINGS_MODULE environment variable
 WORKDIR /code
 # Copy site-packages from the builder stage
 COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages

@@ -1,4 +1,4 @@
-asgiref==3.7.2
+asgiref>=3.8.1   # Adjusted to be compatible with both Django and Channels
 attrs==23.1.0
 bcrypt==4.1.2
 beautifulsoup4==4.12.2
@@ -13,15 +13,15 @@ charset-normalizer==3.2.0
 click==8.1.3
 colorama==0.4.6
 config==0.5.1
-cryptography==41.0.2
+cryptography<43,>=41.0.5
 darr==0.5.4
-djongo==1.3.6
-Django>=4.2
+# Remove djongo to resolve sqlparse conflict
+# djongo==1.3.6  # Commented out due to sqlparse conflict
+Django>=4.2  # Keep Django 4.2 or higher
 djangorestframework>=3.14.0
 channels>=4.1.0
 django-cors-headers>=3.10.1
 djangorestframework-simplejwt>=5.3.1
-
 dnspython==2.4.2
 EasyProcess==1.1
 entrypoint2==1.1
@@ -58,7 +58,7 @@ pydub==0.25.1
 pygame==2.5.1
 PyGetWindow==0.0.9
 PyJWT==2.8.0
-pymongo==3.12.3
+pymongo==3.12.3  # Use pymongo for MongoDB connection instead of djongo
 PyMsgBox==1.0.9
 pypdf==3.14.0
 pyperclip==1.8.2
@@ -80,7 +80,7 @@ sound==0.1.0
 soundfile==0.12.1
 soupsieve==2.4.1
 SQLAlchemy==2.0.29
-sqlparse>=0.2.4,<0.5
+sqlparse>=0.3.1
 channels==4.1.0
 square==0.0.3
 tabulate==0.9.0
