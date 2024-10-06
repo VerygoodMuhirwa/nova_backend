@@ -1,5 +1,6 @@
 asgiref>=3.8.1   # Adjusted to be compatible with both Django and Channels
 attrs==23.1.0
+daphne>=3.0,<4.0
 bcrypt==4.1.2
 beautifulsoup4==4.12.2
 blinker==1.6.2
@@ -15,7 +16,7 @@ colorama==0.4.6
 config==0.5.1
 cryptography<43,>=41.0.5
 darr==0.5.4
-daphne>=3.0,<4.0
+opencv-python==4.5.3.20210929
 djongo==1.3.6
 # Remove djongo to resolve sqlparse conflict
 django==3.0.3
