@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y build-essential
 
 COPY requirements.txt /code/
 RUN python -m pip install --upgrade pip && \
-    pip install --no-cache-dir  :all: -r requirements.txt --verbose
+    pip install --no-cache-dir  -r requirements.txt --verbose
 
 
 # Stage 2: Final image
