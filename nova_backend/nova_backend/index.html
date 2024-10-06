@@ -3,76 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Sensor Data</title>
+    <title>Live Video Stream</title>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        #data {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-        .sensor-item {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
+        #video {
+            width: 640px; /* Set desired width */
+            height: auto; /* Maintain aspect ratio */
         }
     </style>
 </head>
 <body>
-    <h1>Live Sensor Data</h1>
-    <div id="data">Waiting for data...</div>
+    <h1>Live Video Stream</h1>
+    <img id="video" src="" alt="Live Video" />
 
     <script>
-        var socket = new WebSocket('ws://localhost:8000/ws/sensor-data/');
+        const videoElement = document.getElementById('video');
+        const socket = new WebSocket('ws://localhost:8000');
 
-        socket.onmessage = function(e) {
-            var data = JSON.parse(e.data);
-
-            // Log the received data to inspect its structure
-            console.log('Received data:', data);
-
-            // Access the sensor_data array within the object
-            var sensorDataArray = data.sensor_data;
-
-            // Ensure sensorDataArray exists and is an array
-            if (!Array.isArray(sensorDataArray)) {
-                console.error('sensor_data is not an array or is missing.');
-                return;
-            }
-
-            var displayData = '';
-
-            sensorDataArray.forEach(function(data) {
-                // Log each item to see what fields are available
-                console.log('Individual sensor data:', data);
-
-                // Use the correct field names based on the structure of the data
-                var timestamp = new Date(data.timestamp).toLocaleString();
-                var user = data.user || 'N/A';
-                var sensorName = data.sensorName || 'Unknown Sensor';
-                var location = data.location || 'Unknown Location';
-                var physicalQuantity = data.physicalQuantity || 'Unknown Quantity';
-                var value = data.value !== undefined ? data.value : 'No Value';
-
-                displayData += `
-                    <div class="sensor-item">
-                        <strong>Sensor Name:</strong> ${sensorName}<br>
-                        <strong>User ID:</strong> ${user}<br>
-                        <strong>Location:</strong> ${location}<br>
-                        <strong>Physical Quantity:</strong> ${physicalQuantity}<br>
-                        <strong>Value:</strong> ${value}<br>
-                        <strong>Timestamp:</strong> ${timestamp}<br>
-                    </div>
-                `;
-            });
-
-            document.getElementById('data').innerHTML = displayData;
+        socket.onmessage = function(event) {
+            // Set the src of the img to the received frame directly without parsing
+            videoElement.src = 'data:image/jpeg;base64,' + event.data;
         };
 
-        socket.onclose = function(e) {
-            console.error('WebSocket closed unexpectedly');
+        socket.onopen = function() {
+            console.log('WebSocket connection established');
+        };
+
+        socket.onclose = function() {
+            console.log('WebSocket connection closed');
+        };
+
+        socket.onerror = function(error) {
+            console.error('WebSocket Error: ', error);
         };
     </script>
 </body>

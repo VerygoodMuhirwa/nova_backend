@@ -6,6 +6,8 @@ from asgiref.sync import async_to_sync
 from channels.layers import get_channel_layer
 import datetime
 import json
+from django.views import View
+
 
 
 @csrf_exempt
@@ -58,6 +60,43 @@ def fetch_and_receive_data(request):
     return JsonResponse({"status": "failed", "error": "Invalid   request method"}, status=400)
 
 
+
+
+class SensorDataView(View):
+    def post(self, request):
+        data = json.loads(request.body)
+
+        # Create a new SensorData instance
+        sensor_data = SensorData.objects.create(
+            user=data['user'],
+            sensor_name=data['sensorName'],
+            location=data['location'],
+            physical_quantity=data['physicalQuantity'],
+            value=data['value'],
+            timestamp=data['timestamp']
+        )
+
+        # Broadcast the new sensor data to WebSocket clients
+        self.broadcast_sensor_data(sensor_data)
+
+        return JsonResponse({'status': 'success', 'data': data})
+
+    def broadcast_sensor_data(self, sensor_data):
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            'sensor_data_group',  # Use a specific group name for your WebSocket group
+            {
+                'type': 'sensor_data_update',
+                'sensor_data': {
+                    'user': sensor_data.user,
+                    'sensorName': sensor_data.sensor_name,
+                    'location': sensor_data.location,
+                    'physicalQuantity': sensor_data.physical_quantity,
+                    'value': sensor_data.value,
+                    'timestamp': sensor_data.timestamp.isoformat(),
+                }
+            }
+        )
 
 
 @csrf_exempt
