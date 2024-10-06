@@ -116,7 +116,6 @@ class VideoConsumer(AsyncWebsocketConsumer):
                 play_alert_sound()
 
             await asyncio.sleep(0.03)  # Control the frame rate (30 FPS)
-
         cap.release()
 
     def get_face_box(self, net, frame, conf_threshold=0.5):
