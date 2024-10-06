@@ -1,6 +1,5 @@
 asgiref>=3.8.1   # Adjusted to be compatible with both Django and Channels
 attrs==23.1.0
-daphne>=3.0,<4.0
 bcrypt==4.1.2
 beautifulsoup4==4.12.2
 blinker==1.6.2
