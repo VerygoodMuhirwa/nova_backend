@@ -44,7 +44,6 @@ def play_alert_sound():
     pygame.mixer.music.load('alert.wav')
     pygame.mixer.music.play()  # Play the sound
 
-# Call the function to generate the alert sound
 generate_alert_sound()
 
 async def capture_video():
