@@ -1,10 +1,12 @@
 import numpy as np
 import soundfile as sf
-from playsound import playsound
 import cv2
 import asyncio
 import base64
+import pygame  # Import pygame
 
+# Initialize Pygame mixer
+pygame.mixer.init()
 
 # Function to generate and save an alert sound
 def generate_alert_sound():
@@ -20,22 +22,19 @@ def generate_alert_sound():
     # Save the sequence as a .wav file
     sf.write('alert.wav', beep_sequence, 44100)
 
-
 # Function to generate a sine wave
 def generate_tone(frequency, duration, sample_rate=44100, amplitude=0.5):
     t = np.linspace(0, duration, int(sample_rate * duration), endpoint=False)
     wave = amplitude * np.sin(2 * np.pi * frequency * t)
     return wave
 
-
 def play_alert_sound():
-    playsound('alert.wav')
-
+    # Load the alert sound
+    pygame.mixer.music.load('alert.wav')
+    pygame.mixer.music.play()  # Play the sound
 
 # Call the function to generate the alert sound
 generate_alert_sound()
-
-
 
 async def capture_video():
     cap = cv2.VideoCapture(0)  # Open the default camera
