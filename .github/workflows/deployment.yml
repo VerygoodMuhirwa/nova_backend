@@ -4,8 +4,10 @@ on:
   push:
     branches:
       - main
+      - test  # Add test branch to trigger workflow
 
 jobs:
+  # Build job for both test and main branches
   build:
     runs-on: ubuntu-latest
     defaults:
@@ -34,8 +36,10 @@ jobs:
         run: |
            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin docker.io
            docker push docker.io/bruno2006/nova-backend:latest
-          
+
+  # Deploy only when on the main branch
   deploy:
+    if: github.ref == 'refs/heads/main'  # Only deploy if the branch is main
     needs: build
     runs-on: ubuntu-latest
 
@@ -54,7 +58,7 @@ jobs:
           HOST_KEY=$(ssh-keyscan -t rsa 194.163.167.131)
           echo "$HOST_KEY"
           echo "$HOST_KEY" >> $HOME/.ssh/known_hosts
-
+          
       - name: Deploy to server
         uses: appleboy/ssh-action@master
         with:
@@ -70,3 +74,40 @@ jobs:
             sudo docker stop nova-backend || true
             sudo docker rm nova-backend || true
             sudo docker run -d --name nova-backend -p 7500:8000 docker.io/bruno2006/nova-backend
+
+  # Add tests job for test branch
+  test:
+    if: github.ref == 'refs/heads/test'  # Run tests only on the test branch
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+      
+      # Your testing steps
+      - name: Run Tests
+        run: |
+          # Add your test command here, for example:
+          docker build -t nova-backend ./nova_backend
+          docker run nova-backend pytest  # Replace this with actual test commands
+
+  # Optional job to merge 'test' into 'main' automatically after successful tests
+  auto-merge:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/test'  # Only merge if it's the 'test' branch
+    steps:
+      - name: Checkout main branch
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+          git checkout main
+          git pull origin main
+
+      - name: Merge test into main
+        run: |
+          git merge test
+
+      - name: Push changes to main
+        run: |
+          git push origin main
