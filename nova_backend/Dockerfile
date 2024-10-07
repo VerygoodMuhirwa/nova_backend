@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt /code/
+COPY requirements.txt .
 #create virtual env
 RUN python -m venv venv
 RUN . venv/bin/activate
