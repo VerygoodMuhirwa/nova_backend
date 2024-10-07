@@ -108,8 +108,9 @@ TEMPLATES = [
     },
 ]
 
-USERNAME= 'VerygoodMuhirwa'
-PASSWORD= 'Verygood'
+MONGO_DB_USERNAME= 'VerygoodMuhirwa'
+MONGO_DB_PASSWORD= 'Verygood'
+MONGO_DB_NAME="nova_project"
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
