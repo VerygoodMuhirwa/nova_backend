@@ -46,8 +46,8 @@ class SensorDataConsumer(AsyncWebsocketConsumer):
         await self.send_sensor_data()
 
     async def send_sensor_data(self):
-        # Use sync_to_async to perform synchronous DB operations in async context
-        sensor_data_list = await sync_to_async(list)(SensorData.objects.all())
+        # Use sync_to_async to fetch all sensor data from MongoDB in an async context
+        sensor_data_list = await sync_to_async(SensorData.get_all_data)()
 
         # Debug: Print the number of records fetched
         print(f"Number of records fetched: {len(sensor_data_list)}")
@@ -55,12 +55,12 @@ class SensorDataConsumer(AsyncWebsocketConsumer):
         # Prepare data to be sent over the WebSocket
         sensor_data_response = [
             {
-                "user": data.user,  # Access user properly
-                "sensorName": data.sensorName,
-                "location": data.location,
-                "physicalQuantity": data.physicalQuantity,
-                "value": data.value,
-                "timestamp": data.timestamp.isoformat(),
+                "user": data.get("user"),  # Access user from MongoDB document
+                "sensorName": data.get("sensorName"),
+                "location": data.get("location"),
+                "physicalQuantity": data.get("physicalQuantity"),
+                "value": data.get("value"),
+                "timestamp": data.get("timestamp").isoformat() if data.get("timestamp") else None,
             } for data in sensor_data_list
         ]
 
@@ -71,9 +71,6 @@ class SensorDataConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "sensor_data": sensor_data_response
         }))
-
-
-
 class VideoConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()
