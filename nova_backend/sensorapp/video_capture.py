@@ -4,9 +4,20 @@ import cv2
 import asyncio
 import base64
 import pygame  # Import pygame
+import os
+def init_pygame_audio():
+    try:
+        # Optionally, check if running in a Docker environment
+        if os.environ.get('RUNNING_IN_DOCKER', 'false').lower() == 'true':
+            print("Running in Docker, skipping pygame.mixer.init()")
+            return
+        # Initialize Pygame audio if not running in Docker
+        pygame.mixer.init()
+    except pygame.error as e:
+        print(f"Error initializing audio: {e}")
 
-# Initialize Pygame mixer
-pygame.mixer.init()
+init_pygame_audio()
+
 
 # Function to generate and save an alert sound
 def generate_alert_sound():
