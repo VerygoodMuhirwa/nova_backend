@@ -21,8 +21,9 @@ RUN apt-get update && apt-get install -y build-essential
 
 COPY requirements.txt /code/
 RUN python -m pip install --upgrade pip && \
-    pip install --no-cache-dir  -r requirements.txt --verbose
+    pip install --no-cache-dir  -r requirements.txt --verbose \
 
+RUN pip install django==3.0.3
 
 
 # Stage 2: Final image
