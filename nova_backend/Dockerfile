@@ -11,9 +11,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /code/
+#create virtual env
+RUN python -m venv venv
+RUN . venv/bin/activate
 RUN python -m pip install --upgrade pip setuptools
 RUN pip install --no-cache-dir --timeout=120 -r requirements.txt
-RUN pip install django==3.0.3  # Install Django here
 
 # Stage 2: Final image
 FROM python:3.11.1
