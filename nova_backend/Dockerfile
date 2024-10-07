@@ -42,7 +42,7 @@ COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/pytho
 COPY . /code
 EXPOSE 8000
 
-# Start Redis server, PulseAudio, and run the backend application with Daphne
+
 CMD service redis-server start && \
     pulseaudio --start && \
     daphne -p 8000 nova_backend.asgi:application & \
