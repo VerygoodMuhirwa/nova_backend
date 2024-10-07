@@ -50,7 +50,6 @@ def verify_verification_code(request):
     connection = MongoConnection()
     collection = connection.get_collection('verification_codes')
 
-    # Check if the email and code match in the collection
     verification_code = collection.find_one({'email': email, 'code': code})
 
     if not verification_code:

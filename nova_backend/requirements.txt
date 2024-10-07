@@ -96,3 +96,4 @@ Werkzeug==2.3.4
 wikipedia==1.4.0
 wsproto==1.2.0
 drf_yasg==1.21.7
+
