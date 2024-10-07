@@ -25,7 +25,7 @@
     <div id="data">Waiting for data...</div>
 
     <script>
-        var socket = new WebSocket('ws://localhost:8000/ws/sensor-data/');
+        var socket = new WebSocket('ws://194.163.167.131:7500/ws/sensor-data/');
 
         socket.onmessage = function(e) {
             var parsedData = JSON.parse(e.data);
