@@ -108,8 +108,8 @@ TEMPLATES = [
     },
 ]
 
-
-
+USERNAME= 'VerygoodMuhirwa'
+PASSWORD= 'Verygood'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -124,19 +124,19 @@ DATABASES = {
     #         'port': 27017,
     #     }
     # },
-    'mongodb_atlas': {
-        'ENGINE': 'djongo',
-        'ENFORCE_SCHEMA': False,
-        'NAME': 'nova_project',
-
-        'CLIENT': {
-            'host': 'cluster0.c5iqqff.mongodb.net',
-            'username': 'VerygoodMuhirwa',  
-            'password': 'Verygood',  
-            'authSource': 'admin',  
-            'authMechanism': 'SCRAM-SHA-1', 
-        }
-    }
+    # 'mongodb_atlas': {
+    #     'ENGINE': 'djongo',
+    #     'ENFORCE_SCHEMA': False,
+    #     'NAME': 'nova_project',
+    #
+    #     'CLIENT': {
+    #         'host': 'cluster0.c5iqqff.mongodb.net',
+    #         'username': 'VerygoodMuhirwa',
+    #         'password': 'Verygood',
+    #         'authSource': 'admin',
+    #         'authMechanism': 'SCRAM-SHA-1',
+    #     }
+    # }
 }
 
 

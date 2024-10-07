@@ -4,9 +4,10 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.contrib.auth.hashers import make_password, check_password
 from bson import ObjectId
-from django.core.serializers.json import DjangoJSONEncoder
-from .models import User
 import jwt
+from django.core.serializers.json import DjangoJSONEncoder
+from nova_backend.db_connection import MongoConnection
+from pymongo.errors import DuplicateKeyError
 
 
 class MongoEncoder(DjangoJSONEncoder):
@@ -48,17 +49,30 @@ def registerUser(request):
     email = request_data["email"]
     password = request_data["password"]
 
-    if User.objects.filter(email=email).exists():
+    hashed_password = make_password(password, hasher="bcrypt")
+
+    connection = MongoConnection()
+    collection = connection.get_collection('users')
+
+    new_user = {
+        "username": username,
+        "email": email,
+        "password": hashed_password,
+        "photo": "https://icon-library.com/images/anonymous-avatar-icon/anonymous-avatar-icon-25.jpg",
+        "phoneNumber": ""
+    }
+
+    try:
+        # Try to insert the new user (check for duplicate emails)
+        collection.insert_one(new_user)
+    except DuplicateKeyError:
         return Response({"message": "User with that email already exists"}, status=409)
 
-    hashed_password = make_password(password, hasher="bcrypt")
-    new_user = User(username=username, email=email, password=hashed_password)
-    new_user.save()
-
+    # Serialize user info without password
     serialized_user = {
-        "id": new_user.id,
-        "username": new_user.username,
-        "email": new_user.email
+        "id": str(new_user["_id"]),
+        "username": new_user["username"],
+        "email": new_user["email"]
     }
 
     return Response({"message": "User created successfully", "user": serialized_user}, status=200)
@@ -70,15 +84,23 @@ def loginUser(request):
     email = request.data.get('email')
     password = request.data.get('password')
 
-    user = User.objects.filter(email=email).first()
-    print(user)
+    connection = MongoConnection()
+    collection = connection.get_collection('users')
+
+    # Find user by email
+    user = collection.find_one({"email": email})
     if not user:
         return Response({"message": "Invalid email or password"}, status=401)
 
-    if check_password(password, user.password):
-        payload = {"id": str(user.id)}
+    if check_password(password, user['password']):
+        payload = {"id": str(user["_id"])}
         token = jwt.encode(payload, str(os.getenv('JWT_SECRET')), algorithm='HS256')
-        user_data = {"_id": str(user.id), "names": user.username, "email": user.email, "profilePhoto": user.photo}
+        user_data = {
+            "_id": str(user["_id"]),
+            "names": user["username"],
+            "email": user["email"],
+            "profilePhoto": user.get("photo", "")
+        }
         response_data = {"token": token, "message": "Logged in successfully", "user": user_data}
         return Response(data=response_data, status=200)
     else:
@@ -88,7 +110,7 @@ def loginUser(request):
 @csrf_protect
 @api_view(["PUT"])
 @authenticate_user
-def updateProfile(request):  # Remove user_id as a parameter
+def updateProfile(request):
     user_id = request.user_id  # Access the user ID from the request
     request_data = request.data
     email = request_data.get("email")
@@ -98,29 +120,35 @@ def updateProfile(request):  # Remove user_id as a parameter
     oldPassword = request_data.get("oldPassword")
     photo = request_data.get("photo")
 
-    try:
-        user = User.objects.get(pk=user_id)
-    except User.DoesNotExist:
+    connection = MongoConnection()
+    collection = connection.get_collection('users')
+
+    user = collection.find_one({"_id": ObjectId(user_id)})
+
+    if not user:
         return Response({"message": "User not found"}, status=404)
-    if check_password(oldPassword, user.password):
+
+    if check_password(oldPassword, user["password"]):
         saved_password = make_password(newPassword, hasher="bcrypt")
-        user.username = username
-        user.phoneNumber = phoneNumber
-        user.email = email
-        user.photo = photo
-        user.password = saved_password
-        user.save()
+        update_data = {
+            "username": username,
+            "phoneNumber": phoneNumber,
+            "email": email,
+            "photo": photo,
+            "password": saved_password
+        }
+        collection.update_one({"_id": ObjectId(user_id)}, {"$set": update_data})
 
         serialized_user = {
-            "id": user.id,
-            "username": user.username,
-            "email": user.email,
-            "phone_number": user.phoneNumber,
-            "photo": user.photo
+            "id": str(user["_id"]),
+            "username": username,
+            "email": email,
+            "phone_number": phoneNumber,
+            "photo": photo
         }
         return Response({"message": "Profile updated successfully", "user": serialized_user})
     else:
-        return Response({"message": "Invalid email or password"}, status=401)
+        return Response({"message": "Invalid password"}, status=401)
 
 
 @csrf_protect
@@ -128,17 +156,19 @@ def updateProfile(request):  # Remove user_id as a parameter
 @authenticate_user
 def updatePassword(request):
     user_id = request.user_id
-    print(user_id)
     request_data = request.data
     email = request_data.get("email")
     new_password = request_data.get("newPassword")
 
-    try:
-        user = User.objects.get(pk=user_id, email=email)
-    except User.DoesNotExist:
+    connection = MongoConnection()
+    collection = connection.get_collection('users')
+
+    user = collection.find_one({"_id": ObjectId(user_id), "email": email})
+
+    if not user:
         return Response({"message": "User not found"}, status=404)
 
     hashed_password = make_password(new_password, hasher="bcrypt")
-    user.password = hashed_password
-    user.save()
+    collection.update_one({"_id": ObjectId(user_id)}, {"$set": {"password": hashed_password}})
+
     return Response({"message": "Password updated successfully"})

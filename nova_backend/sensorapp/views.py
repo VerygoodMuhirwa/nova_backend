@@ -1,13 +1,12 @@
 import requests
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from .models import SensorData
-from asgiref.sync import async_to_sync
-from channels.layers import get_channel_layer
-import datetime
 import json
 from django.views import View
-
+from .models import SensorData  # Import your custom SensorData class
+from asgiref.sync import async_to_sync
+from channels.layers import get_channel_layer
+from django.utils import timezone
 
 
 @csrf_exempt
@@ -24,14 +23,18 @@ def fetch_and_receive_data(request):
                 if 'field1' in data and 'field2' in data:
                     temperature = float(data['field1'])
                     moisture = float(data['field2'])
-                    timestamp = datetime.datetime.now().isoformat()
+                    timestamp = timezone.now().isoformat()
 
-                    # Save data to the database
-                    sensor_data = SensorData.objects.create(
-                        temperature=temperature,
-                        moisture=moisture,
+                    # Save data to MongoDB
+                    sensor_data = SensorData(
+                        user='default_user',  # Adjust as necessary
+                        sensorName='ThingSpeak Sensor',  # Adjust as necessary
+                        location='Unknown',  # Adjust as necessary
+                        physicalQuantity='Temperature/Moisture',  # Adjust as necessary
+                        value=temperature,  # You can save moisture in another instance if needed
                         timestamp=timestamp
                     )
+                    sensor_data.save()
 
                     # Send data to WebSocket group
                     channel_layer = get_channel_layer()
@@ -40,9 +43,9 @@ def fetch_and_receive_data(request):
                         {
                             "type": "send_sensor_data",
                             "data": {
-                                "timestamp": sensor_data.timestamp.isoformat(),
-                                "temperature": sensor_data.temperature,
-                                "moisture": sensor_data.moisture
+                                "timestamp": sensor_data.timestamp,
+                                "temperature": sensor_data.value,  # or save moisture if applicable
+                                "moisture": moisture
                             }
                         }
                     )
@@ -57,9 +60,7 @@ def fetch_and_receive_data(request):
         except Exception as e:
             return JsonResponse({"status": "failed", "error": f"Error: {e}"}, status=500)
 
-    return JsonResponse({"status": "failed", "error": "Invalid   request method"}, status=400)
-
-
+    return JsonResponse({"status": "failed", "error": "Invalid request method"}, status=400)
 
 
 class SensorDataView(View):
@@ -67,14 +68,15 @@ class SensorDataView(View):
         data = json.loads(request.body)
 
         # Create a new SensorData instance
-        sensor_data = SensorData.objects.create(
+        sensor_data = SensorData(
             user=data['user'],
-            sensor_name=data['sensorName'],
+            sensorName=data['sensorName'],
             location=data['location'],
-            physical_quantity=data['physicalQuantity'],
+            physicalQuantity=data['physicalQuantity'],
             value=data['value'],
-            timestamp=data['timestamp']
+            timestamp=data['timestamp'] or timezone.now().isoformat()  # Default to now if not provided
         )
+        sensor_data.save()
 
         # Broadcast the new sensor data to WebSocket clients
         self.broadcast_sensor_data(sensor_data)
@@ -89,11 +91,11 @@ class SensorDataView(View):
                 'type': 'sensor_data_update',
                 'sensor_data': {
                     'user': sensor_data.user,
-                    'sensorName': sensor_data.sensor_name,
+                    'sensorName': sensor_data.sensorName,
                     'location': sensor_data.location,
-                    'physicalQuantity': sensor_data.physical_quantity,
+                    'physicalQuantity': sensor_data.physicalQuantity,
                     'value': sensor_data.value,
-                    'timestamp': sensor_data.timestamp.isoformat(),
+                    'timestamp': sensor_data.timestamp,
                 }
             }
         )
@@ -106,20 +108,14 @@ def store_sensor_data(request):
             # Load JSON data from request body
             data = json.loads(request.body)
 
-            # Extract data fields
-            user = data.get('user')
-            sensor_name = data.get('sensorName')
-            location = data.get('location')
-            physical_quantity = data.get('physicalQuantity')
-            value = data.get('value')
-
             # Create a new SensorData object and save to MongoDB
             sensor_data = SensorData(
-                user=user,
-                sensorName=sensor_name,
-                location=location,
-                physicalQuantity=physical_quantity,
-                value=value
+                user=data['user'],
+                sensorName=data['sensorName'],
+                location=data['location'],
+                physicalQuantity=data['physicalQuantity'],
+                value=data['value'],
+                timestamp=data.get('timestamp', timezone.now().isoformat())  # Default to now if not provided
             )
             sensor_data.save()
 
@@ -130,22 +126,21 @@ def store_sensor_data(request):
         return JsonResponse({"error": "Only POST requests are allowed"}, status=405)
 
 
-
 def get_all_sensor_data(request):
     if request.method == 'GET':
         try:
-            # Query the database to get all SensorData objects
-            sensor_data_list = SensorData.objects.all()
+            # Fetch all sensor data from MongoDB
+            sensor_data_list = SensorData.get_all_data()
 
             # Create a list of dictionaries to hold the data
             sensor_data_response = [
                 {
-                    "user": data.user,
-                    "sensorName": data.sensorName,
-                    "location": data.location,
-                    "physicalQuantity": data.physicalQuantity,
-                    "value": data.value,
-                    "timestamp": data.timestamp
+                    "user": data['user'],
+                    "sensorName": data['sensorName'],
+                    "location": data['location'],
+                    "physicalQuantity": data['physicalQuantity'],
+                    "value": data['value'],
+                    "timestamp": data['timestamp']
                 } for data in sensor_data_list
             ]
 
