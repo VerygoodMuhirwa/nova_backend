@@ -48,8 +48,6 @@ async def capture_video():
         _, buffer = cv2.imencode('.jpg', frame)
         frame_encoded = base64.b64encode(buffer).decode('utf-8')
 
-        # Send the frame to the WebSocket (implement your sending logic here)
-        # await send_frame(frame_encoded)
 
         await asyncio.sleep(0.03)  # Control the frame rate (30 FPS)
 
