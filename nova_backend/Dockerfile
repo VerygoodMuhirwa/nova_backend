@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 COPY requirements.txt /code/
 RUN python -m pip install --upgrade pip setuptools
 RUN pip install --no-cache-dir --timeout=120 -r requirements.txt
-
+RUN pip install django==3.0.3  # Install Django here
 
 # Stage 2: Final image
 FROM python:3.11.1
@@ -27,7 +27,7 @@ COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/pytho
 COPY . /code
 
 # Install Redis server and Daphne
-RUN apt-get update && apt-get install -y redis-server daphne libgl1-mesa-glx && pip install django==3.0.3 && apt-get clean
+RUN apt-get update && apt-get install -y redis-server daphne libgl1-mesa-glx && apt-get clean
 
 EXPOSE 8000
 
