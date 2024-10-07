@@ -27,7 +27,7 @@ COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/pytho
 COPY . /code
 
 # Install Redis server and Daphne
-RUN apt-get update && apt-get install -y redis-server daphne libgl1-mesa-glx && apt-get clean
+RUN apt-get update && apt-get install -y redis-server daphne libgl1-mesa-glx && pip install django==3.0.3 && apt-get clean
 
 EXPOSE 8000
 
