@@ -29,6 +29,7 @@ COPY --from=builder /usr/local/lib/python3.11/site-packages /usr/local/lib/pytho
 COPY . /code
 EXPOSE 8000
 # Install Redis server and Daphne
-RUN apt-get update && apt-get install -y redis-server && apt-get -y install daphne
+RUN apt-get update && apt-get install -y redis-server && apt-get -y install daphne && pip install django==3.0.3
+
 # Start Redis server and run the backend application with Daphne
 CMD service redis-server start && daphne -p 8000 nova_backend.asgi:application & python manage.py runserver 0.0.0.0:8000
