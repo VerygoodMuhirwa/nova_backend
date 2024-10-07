@@ -34,3 +34,4 @@ RUN apt-get update && apt-get install -y redis-server daphne libgl1-mesa-glx && 
 EXPOSE 8000
 
 CMD ["sh", "-c", "service redis-server start && daphne -p 8000 nova_backend.asgi:application"]
+
