@@ -1,44 +1,44 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Video Stream</title>
-    <style>
-        /* Add some basic styling */
-        #video-frame {
-            width: 640px; /* Set your desired width */
-            height: auto;
-            border: 1px solid #ccc; /* Optional styling */
-        }
-    </style>
-</head>
-<body>
-    <h1>Live Video Stream</h1>
-    <img id="video-frame" alt="Video Stream" />
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Video Stream</title>
+            <style>
+                /* Add some basic styling */
+                #video-frame {
+                    width: 640px; /* Set your desired width */
+                    height: auto;
+                    border: 1px solid #ccc; /* Optional styling */
+                }
+            </style>
+        </head>
+        <body>
+            <h1>Live Video Stream</h1>
+            <img id="video-frame" alt="Video Stream" />
 
-    <script>
-        const videoSocket = new WebSocket('ws://localhost:8000/ws/video-data/'); // Adjust the URL based on your Django settings
+            <script>
+                const videoSocket = new WebSocket('ws://194.163.167.131:7500/ws/video-data/'); // Adjust the URL based on your Django settings
 
-        videoSocket.onopen = function(event) {
-            console.log('WebSocket connection established');
-        };
+                videoSocket.onopen = function(event) {
+                    console.log('WebSocket connection established');
+                };
 
-        videoSocket.onmessage = function(event) {
-            const data = JSON.parse(event.data);
-            if (data.frame) {
-                displayFrame(data.frame);
-            }
-        };
+                videoSocket.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    if (data.frame) {
+                        displayFrame(data.frame);
+                    }
+                };
 
-        videoSocket.onclose = function(event) {
-            console.log('WebSocket connection closed');
-        };
+                videoSocket.onclose = function(event) {
+                    console.log('WebSocket connection closed');
+                };
 
-        function displayFrame(frame) {
-            const imgElement = document.getElementById('video-frame'); // Make sure to have an img element with this ID
-            imgElement.src = `data:image/jpeg;base64,${frame}`; // Set the source to the base64 encoded image
-        }
-    </script>
-</body>
-</html>
+                function displayFrame(frame) {
+                    const imgElement = document.getElementById('video-frame'); // Make sure to have an img element with this ID
+                    imgElement.src = `data:image/jpeg;base64,${frame}`; // Set the source to the base64 encoded image
+                }
+            </script>
+        </body>
+        </html>
