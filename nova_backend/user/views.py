@@ -92,7 +92,6 @@ def loginUser(request):
     connection = MongoConnection()
     collection = connection.get_collection('users')
 
-    # Find user by email
     user = collection.find_one({"email": email})
     if not user:
         return Response({"message": "Invalid email or password"}, status=401)

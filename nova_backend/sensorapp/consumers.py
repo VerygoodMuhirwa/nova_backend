@@ -60,50 +60,34 @@ class SensorDataConsumer(AsyncWebsocketConsumer):
             print("No 'sensor_data' key in the event")
 
     async def send_sensor_data(self):
+        # Fetch sensor data from the database
         sensor_data_list = await sync_to_async(SensorData.get_all_data)()
         print(f"Number of records fetched: {len(sensor_data_list)}")
 
+        # Grouped data by sensorName and sensorId
         grouped_sensor_data = {}
 
         for data in sensor_data_list:
             sensor_name = data.get("sensorName")
             sensor_id = data.get("sensorId")
 
+            # Initialize the sensorName group if not present
             if sensor_name not in grouped_sensor_data:
-                grouped_sensor_data[sensor_name] = []
+                grouped_sensor_data[sensor_name] = {}
 
-            if sensor_name.lower() == 'Humidity_sensor':
-                humidity_group = next(
-                    (group for group in grouped_sensor_data[sensor_name] if group['sensorId'] == sensor_id),
-                    None
-                )
+            # Initialize the sensorId group inside the sensorName if not present
+            if sensor_id not in grouped_sensor_data[sensor_name]:
+                grouped_sensor_data[sensor_name][sensor_id] = []
 
-                if humidity_group is None:
-                    humidity_group = {
-                        "sensorId": sensor_id,
-                        "data": []
-                    }
-                    grouped_sensor_data[sensor_name].append(humidity_group)
-
-                # Append the temperature and moisture values instead of 'value'
-                humidity_group['data'].append({
-                    "user": data.get("user"),
-                    "location": data.get("location"),
-                    "physicalQuantity": data.get("physicalQuantity"),
-                    "temperatureValue": data.get("temperatureValue"),
-                    "moistureValue": data.get("moistureValue"),
-                    "timestamp": data.get("timestamp")
-                })
-            else:
-                # For other sensor types, include temperature and moisture values if present
-                grouped_sensor_data[sensor_name].append({
-                    "user": data.get("user"),
-                    "location": data.get("location"),
-                    "physicalQuantity": data.get("physicalQuantity"),
-                    "temperatureValue": data.get("temperatureValue", None),
-                    "moistureValue": data.get("moistureValue", None),
-                    "timestamp": data.get("timestamp")
-                })
+            # Append the sensor data to the sensorId group
+            grouped_sensor_data[sensor_name][sensor_id].append({
+                "user": data.get("user"),
+                "location": data.get("location"),
+                "physicalQuantity": data.get("physicalQuantity"),
+                "temperatureValue": data.get("temperatureValue", None),
+                "moistureValue": data.get("moistureValue", None),
+                "timestamp": data.get("timestamp")
+            })
 
         # Print the grouped data before sending
         print(f"Sending sensor data: {grouped_sensor_data}")
@@ -156,6 +140,7 @@ class VideoConsumer(AsyncWebsocketConsumer):
 
             await asyncio.sleep(0.03)  # Control the frame rate (30 FPS)
         cap.release()
+
 
     def get_face_box(self, net, frame, conf_threshold=0.5):
         frameHeight = frame.shape[0]
