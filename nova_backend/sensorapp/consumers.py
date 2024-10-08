@@ -51,16 +51,18 @@ class SensorDataConsumer(AsyncWebsocketConsumer):
         await self.send_sensor_data()
 
     async def sensor_data_update(self, event):
-        sensor_data = event['sensor_data']
-        await self.send(text_data=json.dumps({
-            "sensor_data": sensor_data
-        }))
+        if 'sensor_data' in event:
+            sensor_data = event['sensor_data']
+            await self.send(text_data=json.dumps({
+                'sensor_data': sensor_data
+            }))
+        else:
+            print("No 'sensor_data' key in the event")
+
 
     async def send_sensor_data(self):
-        # Use sync_to_async to fetch all sensor data from MongoDB in an async context
         sensor_data_list = await sync_to_async(SensorData.get_all_data)()
 
-        # Debug: Print the number of records fetched
         print(f"Number of records fetched: {len(sensor_data_list)}")
 
         # Create a dictionary to group data by sensor name
@@ -70,13 +72,10 @@ class SensorDataConsumer(AsyncWebsocketConsumer):
             sensor_name = data.get("sensorName")
             sensor_id = data.get("sensorId")
 
-            # Initialize the list for this sensor name if it doesn't exist
             if sensor_name not in grouped_sensor_data:
                 grouped_sensor_data[sensor_name] = []
 
-            # Handle humidity sensor grouping by sensorId
             if sensor_name.lower() == 'humidity sensor':
-                # Initialize the group for this sensorId if it doesn't exist
                 humidity_group = next(
                     (group for group in grouped_sensor_data[sensor_name] if group['sensorId'] == sensor_id),
                     None
