@@ -41,18 +41,28 @@ def authenticate_user(view_func):
     return wrapper
 
 
+
 @csrf_protect
 @api_view(["POST"])
 def registerUser(request):
     request_data = request.data
-    username = request_data["names"]
-    email = request_data["email"]
-    password = request_data["password"]
+    username = request_data.get("names")
+    email = request_data.get("email")
+    password = request_data.get("password")
 
-    hashed_password = make_password(password, hasher="bcrypt")
+    if not username or not email or not password:
+        return Response({"message": "Missing required fields"}, status=400)
 
     connection = MongoConnection()
     collection = connection.get_collection('users')
+
+    # Check if a user with the same email already exists
+    existing_user = collection.find_one({"email": email})
+    if existing_user:
+        return Response({"message": "User with that email already exists"}, status=409)
+
+    # If no user exists with that email, proceed to insert the new user
+    hashed_password = make_password(password, hasher="bcrypt")
 
     new_user = {
         "username": username,
@@ -62,11 +72,7 @@ def registerUser(request):
         "phoneNumber": ""
     }
 
-    try:
-        # Try to insert the new user (check for duplicate emails)
-        collection.insert_one(new_user)
-    except DuplicateKeyError:
-        return Response({"message": "User with that email already exists"}, status=409)
+    collection.insert_one(new_user)
 
     # Serialize user info without password
     serialized_user = {
@@ -74,8 +80,7 @@ def registerUser(request):
         "username": new_user["username"],
         "email": new_user["email"]
     }
-
-    return Response({"message": "User created successfully", "user": serialized_user}, status=200)
+    return Response({"message": "User created successfully", "user": serialized_user}, status=201)
 
 
 @csrf_protect
