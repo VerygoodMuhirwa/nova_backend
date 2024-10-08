@@ -33,7 +33,6 @@ def generate_alert_sound():
     # Save the sequence as a .wav file
     sf.write('alert.wav', beep_sequence, 44100)
 
-# Function to generate a sine wave
 def generate_tone(frequency, duration, sample_rate=44100, amplitude=0.5):
     t = np.linspace(0, duration, int(sample_rate * duration), endpoint=False)
     wave = amplitude * np.sin(2 * np.pi * frequency * t)
