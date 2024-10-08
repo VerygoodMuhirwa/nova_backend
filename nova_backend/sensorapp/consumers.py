@@ -29,21 +29,32 @@ from channels.generic.websocket import AsyncWebsocketConsumer
 from .models import SensorData
 from asgiref.sync import sync_to_async
 
+import json
+from channels.generic.websocket import AsyncWebsocketConsumer
+from asgiref.sync import sync_to_async
+from datetime import datetime
+
 
 class SensorDataConsumer(AsyncWebsocketConsumer):
     async def connect(self):
+        await self.channel_layer.group_add("sensor_data_group", self.channel_name)
         await self.accept()
         print("Connection established.")
-
-        # Immediately send sensor data upon connection
         await self.send_sensor_data()
 
     async def disconnect(self, close_code):
+        await self.channel_layer.group_discard("sensor_data_group", self.channel_name)
         print(f"Disconnected with close code: {close_code}")
 
     async def receive(self, text_data):
         print(f"Data received: {text_data}")
         await self.send_sensor_data()
+
+    async def sensor_data_update(self, event):
+        sensor_data = event['sensor_data']
+        await self.send(text_data=json.dumps({
+            "sensor_data": sensor_data
+        }))
 
     async def send_sensor_data(self):
         # Use sync_to_async to fetch all sensor data from MongoDB in an async context
@@ -52,25 +63,58 @@ class SensorDataConsumer(AsyncWebsocketConsumer):
         # Debug: Print the number of records fetched
         print(f"Number of records fetched: {len(sensor_data_list)}")
 
-        # Prepare data to be sent over the WebSocket
-        sensor_data_response = [
-            {
-                "user": data.get("user"),  # Access user from MongoDB document
-                "sensorName": data.get("sensorName"),
-                "location": data.get("location"),
-                "physicalQuantity": data.get("physicalQuantity"),
-                "value": data.get("value"),
-                "timestamp": data.get("timestamp").isoformat() if data.get("timestamp") else None,
-            } for data in sensor_data_list
-        ]
+        # Create a dictionary to group data by sensor name
+        grouped_sensor_data = {}
 
-        # Print the data before sending
-        print(f"Sending sensor data: {sensor_data_response}")
+        for data in sensor_data_list:
+            sensor_name = data.get("sensorName")
+            sensor_id = data.get("sensorId")
 
-        # Send the sensor data over the WebSocket
+            # Initialize the list for this sensor name if it doesn't exist
+            if sensor_name not in grouped_sensor_data:
+                grouped_sensor_data[sensor_name] = []
+
+            # Handle humidity sensor grouping by sensorId
+            if sensor_name.lower() == 'humidity sensor':
+                # Initialize the group for this sensorId if it doesn't exist
+                humidity_group = next(
+                    (group for group in grouped_sensor_data[sensor_name] if group['sensorId'] == sensor_id),
+                    None
+                )
+
+                if humidity_group is None:
+                    humidity_group = {
+                        "sensorId": sensor_id,
+                        "data": []
+                    }
+                    grouped_sensor_data[sensor_name].append(humidity_group)
+
+                # Append the data to the corresponding sensor ID group
+                humidity_group['data'].append({
+                    "user": data.get("user"),
+                    "location": data.get("location"),
+                    "physicalQuantity": data.get("physicalQuantity"),
+                    "value": data.get("value"),
+                    "timestamp": data.get("timestamp")
+                })
+            else:
+                # For other sensor types, append the data directly under the sensor name
+                grouped_sensor_data[sensor_name].append({
+                    "user": data.get("user"),
+                    "location": data.get("location"),
+                    "physicalQuantity": data.get("physicalQuantity"),
+                    "value": data.get("value"),
+                    "timestamp": data.get("timestamp")
+                })
+
+        # Print the grouped data before sending
+        print(f"Sending sensor data: {grouped_sensor_data}")
+
+        # Send the grouped sensor data over the WebSocket
         await self.send(text_data=json.dumps({
-            "sensor_data": sensor_data_response
+            "sensor_data": grouped_sensor_data
         }))
+
 class VideoConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         await self.accept()

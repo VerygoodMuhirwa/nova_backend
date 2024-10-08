@@ -5,8 +5,9 @@ from nova_backend.db_connection import MongoConnection  # Import the connection 
 
 
 class SensorData:
-    def __init__(self, user, sensorName, location, physicalQuantity, value, timestamp=None):
+    def __init__(self, user, sensorName, sensorId, location, physicalQuantity, value, timestamp=None):
         self.user = user
+        self.sensorId = sensorId
         self.sensorName = sensorName
         self.location = location
         self.physicalQuantity = physicalQuantity
@@ -22,6 +23,7 @@ class SensorData:
         data = {
             "user": self.user,
             "sensorName": self.sensorName,
+            "sensorId": self.sensorId,
             "location": self.location,
             "physicalQuantity": self.physicalQuantity,
             "value": self.value,
