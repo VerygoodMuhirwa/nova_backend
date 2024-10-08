@@ -126,7 +126,8 @@ class VideoConsumer(AsyncWebsocketConsumer):
 
             frameFace, bboxes = self.get_face_box(faceNet, frame)
 
-=            _, buffer = cv.imencode('.jpg', frameFace)
+            # Encode frame as JPEG and send to the client
+            _, buffer = cv.imencode('.jpg', frameFace)
             jpg_as_text = base64.b64encode(buffer).decode('utf-8')
 
             await self.send(text_data=json.dumps({'frame': jpg_as_text}))
