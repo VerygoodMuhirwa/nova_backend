@@ -59,13 +59,10 @@ class SensorDataConsumer(AsyncWebsocketConsumer):
         else:
             print("No 'sensor_data' key in the event")
 
-
     async def send_sensor_data(self):
         sensor_data_list = await sync_to_async(SensorData.get_all_data)()
-
         print(f"Number of records fetched: {len(sensor_data_list)}")
 
-        # Create a dictionary to group data by sensor name
         grouped_sensor_data = {}
 
         for data in sensor_data_list:
@@ -75,7 +72,7 @@ class SensorDataConsumer(AsyncWebsocketConsumer):
             if sensor_name not in grouped_sensor_data:
                 grouped_sensor_data[sensor_name] = []
 
-            if sensor_name.lower() == 'humidity sensor':
+            if sensor_name.lower() == 'Humidity_sensor':
                 humidity_group = next(
                     (group for group in grouped_sensor_data[sensor_name] if group['sensorId'] == sensor_id),
                     None
@@ -88,21 +85,23 @@ class SensorDataConsumer(AsyncWebsocketConsumer):
                     }
                     grouped_sensor_data[sensor_name].append(humidity_group)
 
-                # Append the data to the corresponding sensor ID group
+                # Append the temperature and moisture values instead of 'value'
                 humidity_group['data'].append({
                     "user": data.get("user"),
                     "location": data.get("location"),
                     "physicalQuantity": data.get("physicalQuantity"),
-                    "value": data.get("value"),
+                    "temperatureValue": data.get("temperatureValue"),
+                    "moistureValue": data.get("moistureValue"),
                     "timestamp": data.get("timestamp")
                 })
             else:
-                # For other sensor types, append the data directly under the sensor name
+                # For other sensor types, include temperature and moisture values if present
                 grouped_sensor_data[sensor_name].append({
                     "user": data.get("user"),
                     "location": data.get("location"),
                     "physicalQuantity": data.get("physicalQuantity"),
-                    "value": data.get("value"),
+                    "temperatureValue": data.get("temperatureValue", None),
+                    "moistureValue": data.get("moistureValue", None),
                     "timestamp": data.get("timestamp")
                 })
 

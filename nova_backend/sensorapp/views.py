@@ -21,7 +21,7 @@ def format_sensor_data(sensor_data_list):
         if sensor_name not in grouped_sensor_data:
             grouped_sensor_data[sensor_name] = []
 
-        if sensor_name.lower() == 'humidity sensor':
+        if sensor_name.lower() == 'Humidity_sensor':
             humidity_group = next((group for group in grouped_sensor_data[sensor_name] if group['sensorId'] == sensor_id), None)
             if humidity_group is None:
                 humidity_group = {
@@ -34,7 +34,8 @@ def format_sensor_data(sensor_data_list):
                 "user": data['user'],
                 "location": data['location'],
                 "physicalQuantity": data['physicalQuantity'],
-                "value": data['value'],
+                "temperatureValue": data['temparatureValue'],
+                "moistureValue": data["moistureValue"],
                 "timestamp": data['timestamp']
             })
         else:
@@ -42,7 +43,8 @@ def format_sensor_data(sensor_data_list):
                 "user": data['user'],
                 "location": data['location'],
                 "physicalQuantity": data['physicalQuantity'],
-                "value": data['value'],
+                "temperatureValue": data['temparatureValue'],
+                "moistureValue": data["moistureValue"],
                 "timestamp": data['timestamp']
             })
 
@@ -53,7 +55,6 @@ def format_sensor_data(sensor_data_list):
 def store_sensor_data(request):
     if request.method == 'POST':
         try:
-            # Load JSON data from request body
             data = json.loads(request.body)
             print("Received data:", data)
 
@@ -64,7 +65,8 @@ def store_sensor_data(request):
                 sensorName=data['sensorName'],
                 location=data['location'],
                 physicalQuantity=data['physicalQuantity'],
-                value=data['value'],
+                temperatureValue=data['temparatureValue'],
+                moistureValue=data["moistureValue"],
                 timestamp=data.get('timestamp', timezone.now().isoformat())  # Default to now if not provided
             )
             sensor_data.save()
@@ -99,14 +101,11 @@ def store_sensor_data(request):
 def get_all_sensor_data(request):
     if request.method == 'GET':
         try:
-            # Fetch all sensor data from MongoDB
             sensor_data_list = SensorData.get_all_data()
 
-            # Create a dictionary to group data by sensor name
             grouped_sensor_data = {}
 
             for data in sensor_data_list:
-                # Get the sensor name and sensor ID
                 sensor_name = data['sensorName']
                 sensor_id = data.get('sensorId')
 
@@ -115,7 +114,7 @@ def get_all_sensor_data(request):
                     grouped_sensor_data[sensor_name] = []
 
                 # Handle humidity sensor differently by grouping by sensor ID
-                if sensor_name.lower() == 'humidity sensor':
+                if sensor_name.lower() == 'Humidity_sensor':
                     # Initialize the list for this sensor ID if it doesn't exist
                     humidity_group = next((group for group in grouped_sensor_data[sensor_name] if group['sensorId'] == sensor_id), None)
                     if humidity_group is None:
@@ -130,7 +129,8 @@ def get_all_sensor_data(request):
                         "user": data['user'],
                         "location": data['location'],
                         "physicalQuantity": data['physicalQuantity'],
-                        "value": data['value'],
+                        "temperatureValue": data['temparatureValue'],
+                        "moistureValue": data["moistureValue"],
                         "timestamp": data['timestamp']
                     })
                 else:
@@ -139,7 +139,8 @@ def get_all_sensor_data(request):
                         "user": data['user'],
                         "location": data['location'],
                         "physicalQuantity": data['physicalQuantity'],
-                        "value": data['value'],
+                        "temperatureValue": data['temparatureValue'],
+                        "moistureValue": data["moistureValue"],
                         "timestamp": data['timestamp']
                     })
 

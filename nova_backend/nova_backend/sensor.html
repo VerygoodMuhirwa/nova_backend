@@ -1,73 +1,73 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Live Sensor Data</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-        }
-        #data {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-        .sensor-item {
-            margin-bottom: 20px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-    </style>
-</head>
-<body>
-    <h1>Live Sensor Data</h1>
-    <div id="data">Waiting for data...</div>
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Live Sensor Data</title>
+        <style>
+            body {
+                font-family: Arial, sans-serif;
+            }
+            #data {
+                margin-top: 20px;
+                font-size: 18px;
+            }
+            .sensor-item {
+                margin-bottom: 20px;
+                padding: 10px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Live Sensor Data</h1>
+        <div id="data">Waiting for data...</div>
 
-    <script>
-        var socket = new WebSocket('http://localhost:8000/ws/sensor-data/');
+        <script>
+            var socket = new WebSocket('http://localhost:8000/ws/sensor-data/');
 
-        socket.onmessage = function(e) {
-            var parsedData = JSON.parse(e.data);
-            console.log("Parsed data:", parsedData);  // Log parsed data
-        
-            var sensorDataArray = parsedData.sensor_data;  // Access the 'sensor_data' field
-            console.log("Sensor Data Array:", sensorDataArray);
-        
-            var displayData = '';
-        
-            sensorDataArray.forEach(function(data) {
-                console.log("Processing data item:", data);  // Log each data item
-        
-                var timestamp = new Date(data.timestamp).toLocaleString();
-                console.log("Timestamp:", timestamp);  // Log the field value
-        
-                var user = data.user || "Unknown user";  // Provide a fallback for missing user
-                var sensorName = data.sensorName;
-                var location = data.location;
-                var physicalQuantity = data.physicalQuantity;
-                var value = data.value;
-        
-                console.log(`User: ${user}, Sensor Name: ${sensorName}, Location: ${location}, Quantity: ${physicalQuantity}, Value: ${value}`);
-        
-                displayData += `
-                    <div class="sensor-item">
-                        <strong>Sensor Name:</strong> ${sensorName}<br>
-                        <strong>User ID:</strong> ${user}<br>
-                        <strong>Location:</strong> ${location}<br>
-                        <strong>Physical Quantity:</strong> ${physicalQuantity}<br>
-                        <strong>Value:</strong> ${value}<br>
-                        <strong>Timestamp:</strong> ${timestamp}<br>
-                    </div>
-                `;
-            });
-        
-            document.getElementById('data').innerHTML = displayData;
-        };
-        
-        socket.onclose = function(e) {
-            console.error('WebSocket closed unexpectedly');
-        };
-    </script>
-</body>
-</html>
+            socket.onmessage = function(e) {
+                var parsedData = JSON.parse(e.data);
+                console.log("Parsed data:", parsedData);  // Log parsed data
+
+                var sensorDataArray = parsedData.sensor_data;  // Access the 'sensor_data' field
+                console.log("Sensor Data Array:", sensorDataArray);
+
+                var displayData = '';
+
+                sensorDataArray.forEach(function(data) {
+                    console.log("Processing data item:", data);  // Log each data item
+
+                    var timestamp = new Date(data.timestamp).toLocaleString();
+                    console.log("Timestamp:", timestamp);  // Log the field value
+
+                    var user = data.user || "Unknown user";  // Provide a fallback for missing user
+                    var sensorName = data.sensorName;
+                    var location = data.location;
+                    var physicalQuantity = data.physicalQuantity;
+                    var value = data.value;
+
+                    console.log(`User: ${user}, Sensor Name: ${sensorName}, Location: ${location}, Quantity: ${physicalQuantity}, Value: ${value}`);
+
+                    displayData += `
+                        <div class="sensor-item">
+                            <strong>Sensor Name:</strong> ${sensorName}<br>
+                            <strong>User ID:</strong> ${user}<br>
+                            <strong>Location:</strong> ${location}<br>
+                            <strong>Physical Quantity:</strong> ${physicalQuantity}<br>
+                            <strong>Value:</strong> ${value}<br>
+                            <strong>Timestamp:</strong> ${timestamp}<br>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('data').innerHTML = displayData;
+            };
+
+            socket.onclose = function(e) {
+                console.error('WebSocket closed unexpectedly');
+            };
+        </script>
+    </body>
+    </html>

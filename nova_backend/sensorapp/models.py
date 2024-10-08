@@ -5,13 +5,14 @@ from nova_backend.db_connection import MongoConnection  # Import the connection 
 
 
 class SensorData:
-    def __init__(self, user, sensorName, sensorId, location, physicalQuantity, value, timestamp=None):
+    def __init__(self, user, sensorName, sensorId, location, physicalQuantity, moistureValue, temperatureValue, timestamp=None):
         self.user = user
         self.sensorId = sensorId
         self.sensorName = sensorName
         self.location = location
         self.physicalQuantity = physicalQuantity
-        self.value = value
+        self.moistureValue = moistureValue
+        self.temperatureValue = temperatureValue
         self.timestamp = timestamp if timestamp else timezone.now()
 
     def save(self):
@@ -24,6 +25,8 @@ class SensorData:
             "user": self.user,
             "sensorName": self.sensorName,
             "sensorId": self.sensorId,
+            "temperatureValue":self.temperatureValue,
+            "moistureValue":self.moistureValue,
             "location": self.location,
             "physicalQuantity": self.physicalQuantity,
             "value": self.value,
@@ -33,7 +36,7 @@ class SensorData:
         collection.insert_one(data)  # Insert into MongoDB
 
     def __str__(self):
-        return f"Sensor: {self.sensorName} | Value: {self.value} | Timestamp: {self.timestamp}"
+        return f"Sensor: {self.sensorName} | temperatureValue: {self.temperatureValue} | moistureValue:{self.moistureValue} Timestamp: {self.timestamp}"
 
     @staticmethod
     def get_all_data():
