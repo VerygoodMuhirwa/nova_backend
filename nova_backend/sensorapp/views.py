@@ -9,6 +9,53 @@ from channels.layers import get_channel_layer
 from django.utils import timezone
 
 
+
+@csrf_exempt
+def store_sensor_data(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            print("Received data:", data)
+
+            # Create a new SensorData object and save to MongoDB
+            sensor_data = SensorData(
+                user=data['user'],
+                sensorId=data['sensorId'],
+                sensorName=data['sensorName'],
+                location=data['location'],
+                physicalQuantity=data['physicalQuantity'],
+                temperatureValue=data['temperatureValue'],
+                moistureValue=data["moistureValue"],
+                timestamp=data.get('timestamp', timezone.now().isoformat())  # Default to now if not provided
+            )
+            sensor_data.save()
+
+            sensor_data_list = SensorData.get_all_data()
+
+            formatted_data = format_sensor_data(sensor_data_list)
+
+            print("Broadcasting the following sensor data:", formatted_data)
+
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                'sensor_data_group',  # Replace with your WebSocket group name
+                {
+                    'type': 'sensor_data_update',
+                    'sensor_data': formatted_data
+                }
+            )
+
+            # Return success response
+            return JsonResponse({"message": "Data saved and broadcasted successfully"}, status=201)
+
+        except Exception as e:
+            # Handle any errors and return a failure response
+            return JsonResponse({"error": str(e)}, status=400)
+    else:
+        return JsonResponse({"error": "Only POST requests are allowed"}, status=405)
+
+
+
 def format_sensor_data(sensor_data_list):
     """
     Format the sensor data list into the desired format for WebSocket broadcast.
@@ -34,7 +81,7 @@ def format_sensor_data(sensor_data_list):
                 "user": data['user'],
                 "location": data['location'],
                 "physicalQuantity": data['physicalQuantity'],
-                "temperatureValue": data['temparatureValue'],
+                "temperatureValue": data['temperatureValue'],
                 "moistureValue": data["moistureValue"],
                 "timestamp": data['timestamp']
             })
@@ -43,59 +90,13 @@ def format_sensor_data(sensor_data_list):
                 "user": data['user'],
                 "location": data['location'],
                 "physicalQuantity": data['physicalQuantity'],
-                "temperatureValue": data['temparatureValue'],
+                "temperatureValue": data['temperatureValue'],
                 "moistureValue": data["moistureValue"],
                 "timestamp": data['timestamp']
             })
 
     return grouped_sensor_data
 
-
-@csrf_exempt
-def store_sensor_data(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            print("Received data:", data)
-
-            # Create a new SensorData object and save to MongoDB
-            sensor_data = SensorData(
-                user=data['user'],
-                sensorId=data['sensorId'],
-                sensorName=data['sensorName'],
-                location=data['location'],
-                physicalQuantity=data['physicalQuantity'],
-                temperatureValue=data['temparatureValue'],
-                moistureValue=data["moistureValue"],
-                timestamp=data.get('timestamp', timezone.now().isoformat())  # Default to now if not provided
-            )
-            sensor_data.save()
-
-            # Fetch all sensor data from MongoDB
-            sensor_data_list = SensorData.get_all_data()
-
-            # Format data for WebSocket broadcast
-            formatted_data = format_sensor_data(sensor_data_list)
-
-            print("Broadcasting the following sensor data:", formatted_data)
-
-            channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)(
-                'sensor_data_group',  # Replace with your WebSocket group name
-                {
-                    'type': 'sensor_data_update',
-                    'sensor_data': formatted_data
-                }
-            )
-
-            # Return success response
-            return JsonResponse({"message": "Data saved and broadcasted successfully"}, status=201)
-
-        except Exception as e:
-            # Handle any errors and return a failure response
-            return JsonResponse({"error": str(e)}, status=400)
-    else:
-        return JsonResponse({"error": "Only POST requests are allowed"}, status=405)
 
 
 def get_all_sensor_data(request):
@@ -129,7 +130,7 @@ def get_all_sensor_data(request):
                         "user": data['user'],
                         "location": data['location'],
                         "physicalQuantity": data['physicalQuantity'],
-                        "temperatureValue": data['temparatureValue'],
+                        "temperatureValue": data['temperatureValue'],
                         "moistureValue": data["moistureValue"],
                         "timestamp": data['timestamp']
                     })
@@ -139,7 +140,7 @@ def get_all_sensor_data(request):
                         "user": data['user'],
                         "location": data['location'],
                         "physicalQuantity": data['physicalQuantity'],
-                        "temperatureValue": data['temparatureValue'],
+                        "temperatureValue": data['temperatureValue'],
                         "moistureValue": data["moistureValue"],
                         "timestamp": data['timestamp']
                     })

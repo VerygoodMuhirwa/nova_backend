@@ -25,11 +25,10 @@ class SensorData:
             "user": self.user,
             "sensorName": self.sensorName,
             "sensorId": self.sensorId,
-            "temperatureValue":self.temperatureValue,
-            "moistureValue":self.moistureValue,
             "location": self.location,
+            "temperatureValue": self.temperatureValue,
+            "moistureValue": self.moistureValue,
             "physicalQuantity": self.physicalQuantity,
-            "value": self.value,
             "timestamp": self.timestamp,
         }
 
