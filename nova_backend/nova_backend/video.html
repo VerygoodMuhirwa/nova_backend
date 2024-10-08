@@ -18,7 +18,7 @@
             <img id="video-frame" alt="Video Stream" />
 
             <script>
-                const videoSocket = new WebSocket('ws://localhost:8000/ws/video-data/'); // Adjust the URL based on your Django settings
+                const videoSocket = new WebSocket('ws://localhost:8000/ws/video-data/');
 
                 videoSocket.onopen = function(event) {
                     console.log('WebSocket connection established');
