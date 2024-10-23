@@ -3,7 +3,7 @@ import soundfile as sf
 import cv2
 import asyncio
 import base64
-import pygame  # Import pygame
+import pygame  #
 import os
 def init_pygame_audio():
     try:
@@ -49,7 +49,7 @@ async def capture_video():
     cap = cv2.VideoCapture(0)  # Open the default camera
 
     while True:
-        ret, frame = cap.read()
+        ret, frcame = cap.read()
         if not ret:
             break
         # Process the frame as needed (for example, face detection)
